@@ -19,7 +19,7 @@ const ContactUs = () => {
     return (
         <div className="min-h-screen pt-32 pb-24 px-4 sm:px-6 lg:px-8 bg-[rgb(var(--background))]">
             <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-                
+
                 {/* Contact Info Section */}
                 <div className="space-y-12 animate-float">
                     <div className="space-y-6">
@@ -37,7 +37,7 @@ const ContactUs = () => {
                                 <FiMail />
                             </div>
                             <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">Email Us</h3>
-                            <p className="text-xl font-bold text-gray-900 dark:text-white truncate">hello@bilih.edu.et</p>
+                            <p className="text-xl font-bold text-gray-900 dark:text-white truncate">twinspark07@gmail.com</p>
                         </div>
 
                         <div className="glass-card p-8 rounded-3xl space-y-4 border-none shadow-xl">
@@ -45,7 +45,8 @@ const ContactUs = () => {
                                 <FiPhone />
                             </div>
                             <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">Call Us</h3>
-                            <p className="text-xl font-bold text-gray-900 dark:text-white">+251 987 654 321</p>
+                            <p className="text-xl font-bold text-gray-900 dark:text-white">+251 932553178 <br />
+                                +251 965414565</p>
                         </div>
                     </div>
 
@@ -73,7 +74,7 @@ const ContactUs = () => {
                 {/* Contact Form Section */}
                 <div className="glass-card rounded-[3.5rem] p-10 md:p-16 border-none shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 rounded-bl-[100%] -mr-8 -mt-8 transition-all group-hover:scale-150" />
-                    
+
                     <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
                         <div className="space-y-2">
                             <h2 className="text-3xl font-black">Send a Message</h2>

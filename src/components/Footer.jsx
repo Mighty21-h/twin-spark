@@ -84,11 +84,12 @@ const Footer = () => {
                         <ul className="space-y-4">
                             <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 font-medium">
                                 <FiMail className="text-blue-500 shrink-0" />
-                                hello@bilih.edu.et
+                                twinspark07@gmail.com
                             </li>
                             <li className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400 font-medium">
                                 <FiPhone className="text-emerald-500 shrink-0" />
-                                +251 987 654 321
+                                +251 932553178 <br />
+                                +251 965414565
                             </li>
                         </ul>
                     </div>

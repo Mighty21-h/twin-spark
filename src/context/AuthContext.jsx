@@ -163,6 +163,19 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    // ─── Forgot Password / Recovery ─────────────────────────────────────────────
+
+    const recoverPassword = (username, email, newPassword) => {
+        const users = getUsers();
+        const idx = users.findIndex(u => u.username === username && u.email === email);
+        if (idx !== -1) {
+            users[idx].password = newPassword;
+            saveUsers(users);
+            return true;
+        }
+        return false;
+    };
+
     // ─── Admin-only helpers ────────────────────────────────────────────────────
 
     const getAllUsers = () => {
@@ -202,6 +215,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         loading,
         setUser: updateUser,
+        recoverPassword,
         // Admin helpers
         getAllUsers,
         deleteUser,

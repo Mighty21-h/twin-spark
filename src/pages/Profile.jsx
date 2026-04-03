@@ -10,7 +10,6 @@ const Profile = () => {
     const [formData, setFormData] = useState({
         name: user?.name || '',
         username: user?.username || '',
-        password: '',
         email: user?.email || '',
         department: user?.department || 'Computer Science'
     });
@@ -113,20 +112,7 @@ const Profile = () => {
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-xs font-black uppercase text-gray-400 tracking-widest px-2">New Password</label>
-                                <div className="relative">
-                                    <FiLock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        type="password"
-                                        disabled={!editing}
-                                        placeholder="Leave blank to keep current"
-                                        className="w-full pl-14 pr-6 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-4 focus:ring-blue-500/10 transition-all font-bold disabled:opacity-60"
-                                        value={formData.password}
-                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    />
-                                </div>
-                            </div>
+
 
                             <div className="space-y-2">
                                 <label className="text-xs font-black uppercase text-gray-400 tracking-widest px-2">Department</label>

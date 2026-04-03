@@ -51,13 +51,13 @@ const AboutUs = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
                         {/* Mignotie - Frontend */}
                         <div className="glass-card rounded-[3rem] overflow-hidden group">
-                            <div className="relative h-[400px] overflow-hidden">
+                            <div className="relative h-[400px] overflow-hidden bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center">
                                 <img
-                                    src="/assets/team/mignotie.png"
+                                    src="/mignotie.jpg"
                                     alt="Mignotie Muluken"
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
                                 <div className="absolute bottom-8 left-8 space-y-2">
                                     <h3 className="text-3xl font-black text-white">Mignotie Muluken</h3>
                                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600 text-white font-bold text-sm">
@@ -74,13 +74,13 @@ const AboutUs = () => {
 
                         {/* Elham - Backend */}
                         <div className="glass-card rounded-[3rem] overflow-hidden group">
-                            <div className="relative h-[400px] overflow-hidden">
+                            <div className="relative h-[400px] overflow-hidden bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center">
                                 <img
-                                    src="/assets/team/elham.png"
+                                    src="/elham.jpg"
                                     alt="Elham Million"
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                    className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
                                 <div className="absolute bottom-8 left-8 space-y-2">
                                     <h3 className="text-3xl font-black text-white">Elham Million</h3>
                                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-600 text-white font-bold text-sm">
