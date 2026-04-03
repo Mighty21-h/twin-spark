@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { FiCalendar, FiMapPin, FiArrowRight, FiX, FiCheckCircle } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import { mockOpportunities } from '../utils/mockData';
+import FeedbackSection from './FeedbackSection';
 
 const OpportunitiesGrid = ({ limit }) => {
     // Combine mock opportunities with any events from localStorage to get Hackathons
@@ -228,6 +229,8 @@ const OpportunitiesGrid = ({ limit }) => {
                                         Apply Now
                                     </button>
                                 </div>
+
+                                <FeedbackSection category={`Opportunity: ${selectedOpp.title}`} />
                             </div>
                         ) : (
                             /* Application Form View */

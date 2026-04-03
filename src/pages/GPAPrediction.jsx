@@ -5,6 +5,7 @@ import { FiPieChart, FiPlus, FiTrash2, FiTrendingUp } from 'react-icons/fi';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts';
+import FeedbackSection from '../components/FeedbackSection';
 
 const DEPTS = ['Computer Science', 'Electrical Engineering', 'Software Engineering', 'Information Technology', 'Civil Engineering', 'Mechanical Engineering'];
 
@@ -256,6 +257,9 @@ const GPAPrediction = () => {
                     </div>
 
                 </div>
+
+                {/* Universal Feedback Section */}
+                <FeedbackSection category="GPA Predictor Tool" />
             </div>
         </div>
     );

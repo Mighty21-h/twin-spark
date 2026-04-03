@@ -51,9 +51,14 @@ const Notifications = () => {
             });
         } catch { /* ignore */ }
 
-        // Combine and load any user-specific saved state (read status)
-        // For simplicity, we just merge them here. In real app, read status would persist mapping ID to boolean.
-        setNotifications([...adminNotifs, ...defaultNotifs]);
+        // Combine and apply read state
+        const readIds = JSON.parse(localStorage.getItem(`bilih_read_${user?.username}`) || '[]');
+        
+        const allNotifs = [...adminNotifs, ...defaultNotifs].map(n => ({
+            ...n,
+            read: n.read || readIds.includes(n.id) // mark read if explicitly read or if ID is in stored array
+        }));
+        setNotifications(allNotifs);
     }, [user]);
 
     const filteredNotifications = notifications
@@ -66,10 +71,20 @@ const Notifications = () => {
 
     const markAsRead = (id) => {
         setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+        try {
+            const current = JSON.parse(localStorage.getItem(`bilih_read_${user?.username}`) || '[]');
+            if (!current.includes(id)) {
+                localStorage.setItem(`bilih_read_${user?.username}`, JSON.stringify([...current, id]));
+            }
+        } catch { /* ignore */ }
     };
 
     const markAllAsRead = () => {
         setNotifications(notifications.map(n => ({ ...n, read: true })));
+        try {
+            const allIds = notifications.map(n => n.id);
+            localStorage.setItem(`bilih_read_${user?.username}`, JSON.stringify(allIds));
+        } catch { /* ignore */ }
     };
 
     const getPriorityStyles = (priority) => {

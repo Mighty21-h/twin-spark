@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
 import { FiCalendar, FiClock, FiBook, FiTarget, FiPlus, FiTrash2, FiSearch, FiChevronLeft, FiChevronRight, FiCheckCircle } from 'react-icons/fi';
+import FeedbackSection from '../components/FeedbackSection';
 
 const COURSES = [
   "Data Structures and Algorithms", "Database Management Systems", "Software Engineering",
@@ -340,6 +341,8 @@ const StudyPlanner = () => {
 
           </div>
         </div>
+
+        <FeedbackSection category="Study Planner Tool" />
       </div>
     </div>
   );

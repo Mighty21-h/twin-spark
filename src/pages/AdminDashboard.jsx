@@ -121,12 +121,33 @@ const AdminDashboard = () => {
 
   // Event Management state
   const [events, setEvents] = useState([]);
-  const [eventModal, setEventModal] = useState(null); // null | 'add' | {event}
-  const [eventForm, setEventForm] = useState({ title: '', description: '', type: 'Hackathon', startDate: '', deadline: '', location: '', link: '', skills: '', featured: '' });
+  const initialEventForm = { title: '', description: '', type: 'Hackathon', startDate: '', deadline: '', location: '', link: '', skills: '', featured: '', jobTitle: '', jobType: 'Full-Time', applicantNeed: 'Both', salary: '' };
+  const [eventForm, setEventForm] = useState(initialEventForm);
 
-  // Notification state
-  const [notifForm, setNotifForm] = useState({ title: '', message: '', type: 'global', department: '', year: '', priority: 'general' });
-  const [sentNotifs, setSentNotifs] = useState([]);
+    const [sentNotifs, setSentNotifs] = useState([]);
+    
+    // Feedback Management state
+    const [allFeedback, setAllFeedback] = useState([]);
+    const [feedbackFilter, setFeedbackFilter] = useState('All');
+    const [isLoadingFeedback, setIsLoadingFeedback] = useState(false);
+
+    const fetchFeedback = async () => {
+        setIsLoadingFeedback(true);
+        try {
+            const token = localStorage.getItem('token') || '';
+            const response = await fetch('http://localhost:5000/api/feedback/admin/all', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            if (result.success) {
+                setAllFeedback(result.data);
+            }
+        } catch (error) {
+            console.error("Fetch Feedback Error:", error);
+        } finally {
+            setIsLoadingFeedback(false);
+        }
+    };
 
   // Auth guard
   useEffect(() => {
@@ -138,6 +159,9 @@ const AdminDashboard = () => {
     setUsers(getAllUsers ? getAllUsers() : []);
     setEvents(loadEvents());
     setSentNotifs(loadAdminNotifs());
+    if (tab === 'feedback') {
+        fetchFeedback();
+    }
   }, [tab]);
 
   if (!user || user.role !== 'admin') {
@@ -192,7 +216,7 @@ const AdminDashboard = () => {
 
   // ─── Event Management ───────────────────────────────────────────────────────
   const openAddEvent = () => {
-    setEventForm({ title: '', description: '', type: 'Hackathon', startDate: '', deadline: '', location: '', link: '', skills: '', featured: '' });
+    setEventForm(initialEventForm);
     setEventModal('add');
   };
   const openEditEvent = (ev) => { setEventForm({ ...ev }); setEventModal(ev); };
@@ -549,108 +573,121 @@ const AdminDashboard = () => {
 
         {/* ════════ FEEDBACK ANALYTICS ════════ */}
         {tab === 'feedback' && (
-          <div className="p-8 space-y-6">
-            <div>
-              <h1 className="text-3xl font-black text-white">Feedback <span className="text-indigo-400">Analytics</span></h1>
-              <p className="text-slate-400 mt-1">Understand user satisfaction and identify areas to improve.</p>
+          <div className="p-8 space-y-6 animate-fade-in">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-black text-white">Feedback <span className="text-indigo-400">Management</span></h1>
+                <p className="text-slate-400 mt-1">Monitor user satisfaction across all platform modules.</p>
+              </div>
+              <button 
+                onClick={fetchFeedback}
+                disabled={isLoadingFeedback}
+                className="p-3 bg-slate-800 text-slate-400 hover:text-white rounded-xl transition-all disabled:opacity-50"
+              >
+                <FiRefreshCw className={isLoadingFeedback ? 'animate-spin' : ''} />
+              </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 text-center">
-                <FiThumbsUp className="text-emerald-400 text-3xl mx-auto mb-2" />
-                <p className="text-3xl font-black text-white">{FEEDBACK_DATA.likes.toLocaleString()}</p>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">Total Likes</p>
-              </div>
-              <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 text-center">
-                <FiThumbsDown className="text-red-400 text-3xl mx-auto mb-2" />
-                <p className="text-3xl font-black text-white">{FEEDBACK_DATA.dislikes.toLocaleString()}</p>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">Total Dislikes</p>
-              </div>
-              <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 text-center">
-                <FiMessageSquare className="text-blue-400 text-3xl mx-auto mb-2" />
-                <p className="text-3xl font-black text-white">{FEEDBACK_DATA.comments.length}</p>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">Comments</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
-                <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2"><FiPieChart className="text-indigo-400" /> User Satisfaction</h3>
-                <div className="flex items-center gap-6">
-                  <PieChart width={180} height={180}>
-                    <Pie data={[{ name: 'Satisfied', value: FEEDBACK_DATA.likes }, { name: 'Dissatisfied', value: FEEDBACK_DATA.dislikes }]} cx={85} cy={85} innerRadius={55} outerRadius={80} dataKey="value">
-                      <Cell fill="#22c55e" />
-                      <Cell fill="#ef4444" />
-                    </Pie>
-                    <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 12, color: '#fff' }} />
-                  </PieChart>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                      <span className="text-white font-bold text-sm">Satisfied</span>
-                      <span className="text-emerald-400 font-black ml-auto">{Math.round(FEEDBACK_DATA.likes / (FEEDBACK_DATA.likes + FEEDBACK_DATA.dislikes) * 100)}%</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-red-500" />
-                      <span className="text-white font-bold text-sm">Dissatisfied</span>
-                      <span className="text-red-400 font-black ml-auto">{Math.round(FEEDBACK_DATA.dislikes / (FEEDBACK_DATA.likes + FEEDBACK_DATA.dislikes) * 100)}%</span>
-                    </div>
-                  </div>
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-slate-800 border border-emerald-500/20 rounded-2xl p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-xl">
+                  <FiThumbsUp />
+                </div>
+                <div>
+                   <p className="text-2xl font-black text-white">{allFeedback.filter(f => f.type === 'like').length}</p>
+                   <p className="text-slate-500 text-xs font-bold uppercase">Total Likes</p>
                 </div>
               </div>
-
-              <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
-                <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2"><FiBarChart2 className="text-violet-400" /> Feature Popularity</h3>
-                <ResponsiveContainer width="100%" height={180}>
-                  <BarChart data={FEATURE_POPULARITY} layout="vertical">
-                    <XAxis type="number" hide />
-                    <YAxis type="category" dataKey="feature" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} width={90} />
-                    <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 12, color: '#fff' }} />
-                    <Bar dataKey="usage" fill="#6366f1" radius={[0, 6, 6, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="bg-slate-800 border border-red-500/20 rounded-2xl p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center text-xl">
+                  <FiThumbsDown />
+                </div>
+                <div>
+                   <p className="text-2xl font-black text-white">{allFeedback.filter(f => f.type === 'dislike').length}</p>
+                   <p className="text-slate-500 text-xs font-bold uppercase">Total Dislikes</p>
+                </div>
+              </div>
+              <div className="bg-slate-800 border border-blue-500/20 rounded-2xl p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl">
+                  <FiMessageSquare />
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-white">{allFeedback.filter(f => f.comment).length}</p>
+                  <p className="text-slate-500 text-xs font-bold uppercase">Total Comments</p>
+                </div>
               </div>
             </div>
 
-            {/* Insights */}
-            <div className="bg-slate-800 border border-amber-500/20 rounded-2xl p-6">
-              <h3 className="text-amber-400 font-bold text-lg mb-4 flex items-center gap-2"><FiAlertCircle /> Improvement Insights</h3>
-              <div className="space-y-3">
-                {[
-                  { issue: 'Notification clarity is flagged by users', action: 'Improve priority labeling and grouping' },
-                  { issue: 'Language learning usage is the lowest (62%)', action: 'Add more Ethiopian language content' },
-                  { issue: 'Event overload reported in feedback', action: 'Increase gap between events, limit to 3/week' },
-                ].map((insight, i) => (
-                  <div key={i} className="flex gap-4 p-4 bg-slate-700/50 rounded-xl">
-                    <div className="w-2 h-2 rounded-full bg-amber-500 mt-2 flex-shrink-0" />
-                    <div>
-                      <p className="text-white font-semibold text-sm">⚠ {insight.issue}</p>
-                      <p className="text-slate-400 text-xs mt-1">→ {insight.action}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {/* Filters */}
+            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+               <FiFilter className="text-slate-500 shrink-0" />
+               {['All', 'GPA Predictor', 'Study Planner', 'Amharic', 'Afaan Oromo', 'English', 'Opportunity'].map(cat => (
+                 <button 
+                  key={cat} 
+                  onClick={() => setFeedbackFilter(cat)}
+                  className={`px-4 py-2 rounded-xl text-xs font-black whitespace-nowrap transition-all ${feedbackFilter === cat ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                 >
+                   {cat}
+                 </button>
+               ))}
             </div>
 
-            {/* Comments */}
-            <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
-              <h3 className="text-white font-bold text-lg mb-4">Recent Comments</h3>
-              <div className="space-y-3">
-                {FEEDBACK_DATA.comments.map(c => (
-                  <div key={c.id} className="flex items-start gap-4 p-4 bg-slate-700/40 rounded-xl">
-                    <div className={`text-xl ${c.rating === 'like' ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {c.rating === 'like' ? '👍' : '👎'}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-1">
-                        <p className="text-white font-bold text-sm">{c.user}</p>
-                        <p className="text-slate-500 text-xs">{c.date}</p>
-                      </div>
-                      <p className="text-slate-300 text-sm">{c.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {/* Feedback List */}
+            <div className="bg-slate-800 border border-slate-700/50 rounded-2xl overflow-hidden shadow-xl">
+               <div className="max-h-[600px] overflow-y-auto">
+                 {allFeedback.filter(f => feedbackFilter === 'All' || f.category.toLowerCase().includes(feedbackFilter.toLowerCase())).length === 0 ? (
+                   <div className="p-20 text-center text-slate-500">
+                     <FiMessageSquare className="text-5xl mx-auto mb-4 opacity-20" />
+                     <p className="font-bold">No feedback found for this category</p>
+                   </div>
+                 ) : (
+                   <table className="w-full">
+                     <thead className="bg-slate-900/50 border-b border-slate-700 sticky top-0 z-10">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">User</th>
+                          <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Category</th>
+                          <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Reaction</th>
+                          <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Comment</th>
+                          <th className="px-6 py-4 text-right text-xs font-black text-slate-500 uppercase tracking-widest">Date</th>
+                        </tr>
+                     </thead>
+                     <tbody className="divide-y divide-slate-700/50">
+                        {allFeedback
+                          .filter(f => feedbackFilter === 'All' || f.category.toLowerCase().includes(feedbackFilter.toLowerCase()))
+                          .map((f, i) => (
+                          <tr key={f.id} className="hover:bg-slate-700/30 transition-colors">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-black text-xs">
+                                  {f.user_handle?.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <p className="text-white text-xs font-bold">{f.user_full_name || 'System User'}</p>
+                                  <p className="text-slate-500 text-[10px]">@{f.user_handle}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="text-white text-xs font-bold">{f.category}</span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase flex items-center gap-1 w-fit ${f.type === 'like' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
+                                {f.type === 'like' ? <><FiThumbsUp /> Liked</> : <><FiThumbsDown /> Disliked</>}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 max-w-xs">
+                              <p className="text-slate-300 text-xs italic">{f.comment || '—'}</p>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <span className="text-slate-500 text-xs font-medium">{new Date(f.created_at).toLocaleDateString()}</span>
+                            </td>
+                          </tr>
+                        ))}
+                     </tbody>
+                   </table>
+                 )}
+               </div>
             </div>
           </div>
         )}
@@ -782,8 +819,23 @@ const AdminDashboard = () => {
             <input value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} placeholder="Event Title *" className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm" />
             <textarea value={eventForm.description} onChange={e => setEventForm(f => ({ ...f, description: e.target.value }))} placeholder="Description" rows={3} className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm resize-none" />
             <select value={eventForm.type} onChange={e => setEventForm(f => ({ ...f, type: e.target.value }))} className="w-full bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm">
-              <option>Hackathon</option><option>Workshop</option><option>Club</option>
+              <option>Job</option><option>Internship</option><option>Scholarship</option><option>Hackathon</option><option>Workshop</option><option>Club</option>
             </select>
+            {['Job', 'Internship', 'Scholarship'].includes(eventForm.type) && (
+                <div className="space-y-3 p-4 bg-slate-800 rounded-xl border border-indigo-500/30">
+                    <p className="text-xs font-black text-indigo-400 uppercase tracking-widest">Opportunity Details</p>
+                    <input value={eventForm.jobTitle} onChange={e => setEventForm(f => ({ ...f, jobTitle: e.target.value }))} placeholder="Job/Role Title" className="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm" />
+                    <div className="grid grid-cols-2 gap-3">
+                        <select value={eventForm.jobType} onChange={e => setEventForm(f => ({ ...f, jobType: e.target.value }))} className="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm">
+                            <option>Full-Time</option><option>Part-Time</option><option>Remote</option><option>Contract</option><option>One-Time</option>
+                        </select>
+                        <select value={eventForm.applicantNeed} onChange={e => setEventForm(f => ({ ...f, applicantNeed: e.target.value }))} className="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm">
+                            <option>Both</option><option>Male</option><option>Female</option>
+                        </select>
+                    </div>
+                    <input value={eventForm.salary} onChange={e => setEventForm(f => ({ ...f, salary: e.target.value }))} placeholder="Salary/Prize (e.g. $50,000/yr)" className="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm" />
+                </div>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 block">Start Date</label>

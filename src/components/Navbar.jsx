@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FiMenu, FiSun, FiMoon, FiSearch, FiLogOut, FiChevronDown, FiTrendingUp, FiGlobe, FiX, FiLayout, FiBookOpen, FiBriefcase, FiStar, FiSettings } from 'react-icons/fi';
+import { FiMenu, FiSun, FiMoon, FiSearch, FiLogOut, FiChevronDown, FiTrendingUp, FiGlobe, FiX, FiLayout, FiBookOpen, FiBriefcase, FiStar, FiSettings, FiCpu } from 'react-icons/fi';
 import { MdNotifications } from 'react-icons/md';
 
 const Navbar = () => {
@@ -10,14 +10,45 @@ const Navbar = () => {
     const [isDark, setIsDark] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const [notifications] = useState(5);
+    const [notificationsCount, setNotificationsCount] = useState(0);
+
+    const checkNotifications = () => {
+        if (!user) return;
+        const readIds = JSON.parse(localStorage.getItem(`bilih_read_${user.username}`) || '[]');
+        
+        const defaultNotifs = [1, 2]; // Hardcoded unread mock IDs from Notifications.jsx logic
+        const defaultUnreadCount = defaultNotifs.filter(id => !readIds.includes(id)).length;
+        
+        let adminNotifs = [];
+        try {
+            const stored = JSON.parse(localStorage.getItem('bilih_notifications') || '[]');
+            adminNotifs = stored.filter(n => {
+                if (n.type !== 'global') {
+                    if (!user) return false;
+                    const matchDept = !n.department || n.department === user.department;
+                    const matchYear = !n.year || n.year === user.year;
+                    return matchDept && matchYear;
+                }
+                return true;
+            });
+        } catch { /* ignore */ }
+        
+        const adminUnreadCount = adminNotifs.filter(n => !readIds.includes(n.id)).length;
+        setNotificationsCount(defaultUnreadCount + adminUnreadCount);
+    };
 
     useEffect(() => {
+        checkNotifications();
         const handleScroll = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         setIsDark(document.documentElement.classList.contains('dark'));
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+        
+        const interval = setInterval(checkNotifications, 3000);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            clearInterval(interval);
+        };
+    }, [user]);
 
     const toggleDarkMode = () => {
         document.documentElement.classList.toggle('dark');
@@ -26,6 +57,7 @@ const Navbar = () => {
 
     const navLinks = [
         { label: 'Language Learning', to: '/language', icon: <FiGlobe /> },
+        { label: 'AI Language Tutor', to: '/language-tutor', icon: <FiCpu className="text-indigo-500" /> },
         { label: 'GPA Prediction', to: '/gpa-prediction', icon: <FiTrendingUp /> },
         { label: 'Study Planner', to: '/study-planner', icon: <FiBookOpen /> },
         { label: 'Opportunities', to: '/opportunities', icon: <FiSearch /> },
@@ -87,9 +119,11 @@ const Navbar = () => {
                                     className="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-2xl relative transition-colors"
                                 >
                                     <MdNotifications className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-                                    <span className="absolute top-2 right-2 w-4 h-4 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full text-[10px] flex items-center justify-center text-white font-bold">
-                                        {notifications}
-                                    </span>
+                                    {notificationsCount > 0 && (
+                                        <span className="absolute top-2 right-2 w-4 h-4 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full text-[10px] flex items-center justify-center text-white font-bold">
+                                            {notificationsCount > 9 ? '9+' : notificationsCount}
+                                        </span>
+                                    )}
                                 </Link>
                             )}
 

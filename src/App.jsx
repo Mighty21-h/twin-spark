@@ -12,6 +12,7 @@ import Opportunities from './pages/Opportunities';
 import AdminDashboard from './pages/AdminDashboard';
 import VerifyEmail from './pages/VerifyEmail';
 import LanguageLearning from './pages/LanguageLearning';
+import LanguageTutor from './pages/LanguageTutor';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/ContactUs';
 import Notifications from './pages/Notifications';
@@ -55,6 +56,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <LanguageLearning />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/language-tutor"
+            element={
+              <ProtectedRoute>
+                <LanguageTutor />
               </ProtectedRoute>
             }
           />

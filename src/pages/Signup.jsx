@@ -27,7 +27,7 @@ const Signup = () => {
         try {
             await signup(formData);
             toast.success('Account created! Welcome to BILIH.');
-            navigate('/dashboard');
+            navigate('/');
         } catch (error) {
             toast.error(error.message || 'Signup failed');
         } finally {

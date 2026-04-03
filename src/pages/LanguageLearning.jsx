@@ -1,6 +1,7 @@
-// src/pages/LanguageLearning.jsx
 import { useState } from 'react';
-import { FiPlay, FiCheck, FiZap, FiBookOpen, FiStar, FiSettings, FiBriefcase, FiVolume2, FiMessageCircle, FiArrowRight } from 'react-icons/fi';
+import { FiPlay, FiCheck, FiZap, FiBookOpen, FiStar, FiSettings, FiBriefcase, FiVolume2, FiMessageCircle, FiArrowRight, FiArrowLeft, FiHash } from 'react-icons/fi';
+import { NUMBERS_DATA } from '../data/numbers';
+import FeedbackSection from '../components/FeedbackSection';
 
 const TRANSLATIONS = {
     'amharic': [
@@ -31,6 +32,7 @@ const LanguageLearning = () => {
     const [activeLesson, setActiveLesson] = useState(null); // 'Basic Greetings'
     const [streak] = useState(7);
     const [progress] = useState(65);
+    const [numberPage, setNumberPage] = useState(0); // 0: 1-20, 1: 21-30, 2: 31-40...
 
     const languages = [
         { id: 'amharic', name: 'አማርኛ (Amharic)', flag: '🇪🇹', level: 'Intermediate', color: 'blue' },
@@ -40,7 +42,7 @@ const LanguageLearning = () => {
 
     const lessons = [
         { title: 'Basic Greetings', completed: true, duration: '10 min', clickable: true },
-        { title: 'Numbers 1-100', completed: true, duration: '15 min', clickable: false },
+        { title: 'Numbers 1-100', completed: true, duration: '15 min', clickable: true },
         { title: 'Daily Phrases', completed: false, duration: '12 min', clickable: false },
         { title: 'Food & Shopping', completed: false, duration: '20 min', clickable: false }
     ];
@@ -143,29 +145,82 @@ const LanguageLearning = () => {
                                     </div>
 
                                     <div className="space-y-4">
-                                        {TRANSLATIONS[selectedLanguage]?.map((item, idx) => (
-                                            <div key={idx} className="glass-card rounded-[2rem] p-6 border border-gray-200 dark:border-gray-800 hover:border-emerald-500/50 transition-colors group flex items-center justify-between">
-                                                <div className="flex items-center gap-6">
-                                                    <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 font-black text-xl flex items-center justify-center border border-gray-200 dark:border-gray-700">
-                                                        {idx + 1}
+                                        {activeLesson === 'Basic Greetings' ? (
+                                            TRANSLATIONS[selectedLanguage]?.map((item, idx) => (
+                                                <div key={idx} className="glass-card rounded-[2rem] p-6 border border-gray-200 dark:border-gray-800 hover:border-emerald-500/50 transition-colors group flex items-center justify-between">
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 font-black text-xl flex items-center justify-center border border-gray-200 dark:border-gray-700">
+                                                            {idx + 1}
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xs uppercase tracking-widest font-black text-emerald-500 mb-1">English</p>
+                                                            <p className="text-lg font-black text-gray-900 dark:text-white">{item.english}</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <p className="text-xs uppercase tracking-widest font-black text-emerald-500 mb-1">English</p>
-                                                        <p className="text-lg font-black text-gray-900 dark:text-white">{item.english}</p>
+                                                    
+                                                    <FiArrowRight className="text-gray-300 dark:text-gray-700 text-2xl hidden md:block" />
+
+                                                    <div className="text-right">
+                                                        <p className="text-xs uppercase tracking-widest font-black text-gray-400 mb-1">Translation</p>
+                                                        <p className="text-xl font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2 rounded-xl inline-block border border-emerald-100 dark:border-emerald-800/30">
+                                                            {item.translated}
+                                                        </p>
                                                     </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="space-y-6">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {NUMBERS_DATA.slice(numberPage === 0 ? 0 : 20 + (numberPage - 1) * 10, numberPage === 0 ? 20 : 20 + numberPage * 10).map((num) => (
+                                                        <div key={num.id} className="glass-card rounded-2xl p-5 border border-gray-200 dark:border-gray-800 hover:border-emerald-500/30 transition-all flex items-center gap-4">
+                                                            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-500 font-black flex items-center justify-center border border-emerald-500/20">
+                                                                {num.id}
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <div className="flex justify-between items-center mb-1">
+                                                                    <span className="text-xs font-bold uppercase text-gray-400 tracking-tighter">English</span>
+                                                                    <span className="text-sm font-black text-gray-900 dark:text-white">{num.english}</span>
+                                                                </div>
+                                                                <div className="flex justify-between items-center">
+                                                                    <span className="text-xs font-bold uppercase text-emerald-500/60 tracking-tighter">
+                                                                        {selectedLanguage === 'amharic' ? 'Amharic' : (selectedLanguage === 'oromo' ? 'Afaan Oromo' : 'Translation')}
+                                                                    </span>
+                                                                    <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">
+                                                                        {selectedLanguage === 'amharic' ? num.amharic : (selectedLanguage === 'oromo' ? num.oromo : num.english)}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                                 
-                                                <FiArrowRight className="text-gray-300 dark:text-gray-700 text-2xl hidden md:block" />
-
-                                                <div className="text-right">
-                                                    <p className="text-xs uppercase tracking-widest font-black text-gray-400 mb-1">Translation</p>
-                                                    <p className="text-xl font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2 rounded-xl inline-block border border-emerald-100 dark:border-emerald-800/30">
-                                                        {item.translated}
-                                                    </p>
+                                                <div className="flex items-center justify-between pt-6">
+                                                    <button 
+                                                        onClick={() => setNumberPage(p => Math.max(0, p - 1))}
+                                                        disabled={numberPage === 0}
+                                                        className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black transition-all ${numberPage === 0 ? 'opacity-30 cursor-not-allowed grayscale' : 'bg-white dark:bg-gray-800 hover:scale-105 active:scale-95 shadow-md border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-white'}`}
+                                                    >
+                                                        <FiArrowLeft /> Previous
+                                                    </button>
+                                                    <div className="text-gray-400 font-black uppercase text-[10px] tracking-[0.2em]">
+                                                        {numberPage === 0 ? 'Showing 1-20' : `Showing ${21 + (numberPage - 1) * 10}-${Math.min(100, 20 + numberPage * 10)}`}
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => setNumberPage(p => Math.min(8, p + 1))}
+                                                        disabled={numberPage === 8}
+                                                        className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black transition-all ${numberPage === 8 ? 'opacity-30 cursor-not-allowed grayscale' : 'bg-emerald-500 text-white hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/30'}`}
+                                                    >
+                                                        Next <FiArrowRight />
+                                                    </button>
                                                 </div>
                                             </div>
-                                        ))}
+                                        )}
                                     </div>
+
+                                    {/* Universal Feedback Section per Phase */}
+                                    <FeedbackSection 
+                                        category={`${languages.find(l=>l.id===selectedLanguage)?.name} ${activeLesson || 'Basics'}`} 
+                                    />
                                 </div>
                             )}
                         </div>
