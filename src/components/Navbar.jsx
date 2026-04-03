@@ -81,15 +81,17 @@ const Navbar = () => {
 
                     <div className="flex items-center space-x-2 md:space-x-4">
                         <div className="flex items-center gap-1">
-                            <Link 
-                                to="/notifications"
-                                className="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-2xl relative transition-colors"
-                            >
-                                <MdNotifications className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-                                <span className="absolute top-2 right-2 w-4 h-4 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full text-[10px] flex items-center justify-center text-white font-bold">
-                                    {notifications}
-                                </span>
-                            </Link>
+                            {user && (
+                                <Link 
+                                    to="/notifications"
+                                    className="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-2xl relative transition-colors"
+                                >
+                                    <MdNotifications className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+                                    <span className="absolute top-2 right-2 w-4 h-4 bg-red-500 border-2 border-white dark:border-gray-900 rounded-full text-[10px] flex items-center justify-center text-white font-bold">
+                                        {notifications}
+                                    </span>
+                                </Link>
+                            )}
 
                             <button
                                 onClick={toggleDarkMode}

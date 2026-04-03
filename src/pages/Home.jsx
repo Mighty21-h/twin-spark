@@ -1,10 +1,23 @@
 // src/pages/Home.jsx
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FiArrowRight, FiZap, FiTarget, FiGlobe } from 'react-icons/fi';
+import { toast } from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 import GPAAnalyticsCard from '../components/GPAAnalyticsCard';
 import OpportunitiesGrid from '../components/OpportunitiesGrid';
 
 const Home = () => {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    const handleCtaClick = (e, path) => {
+        if (user) {
+            e.preventDefault();
+            toast('You have already an account', { icon: 'ℹ️' });
+        } else {
+            navigate(path);
+        }
+    };
     return (
         <div className="min-h-screen overflow-x-hidden">
             {/* Hero Section */}
@@ -28,9 +41,9 @@ const Home = () => {
                         </p>
                         
                         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-8">
-                            <Link to="/signup" className="btn-primary flex items-center gap-3 text-lg group">
+                            <button onClick={(e) => handleCtaClick(e, '/signup')} className="btn-primary flex items-center gap-3 text-lg group">
                                 Get Started Free <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
-                            </Link>
+                            </button>
                             <Link to="/opportunities" className="px-8 py-4 rounded-2xl font-bold border-2 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-lg">
                                 Explore Opportunities
                             </Link>
@@ -90,9 +103,9 @@ const Home = () => {
                     <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
                     <h2 className="text-4xl md:text-6xl font-black mb-8 relative z-10">Join the Future of Education in Ethiopia</h2>
                     <p className="text-xl md:text-2xl mb-12 opacity-90 relative z-10">Over 10,000 students are already leveling up their careers with BILIH.</p>
-                    <Link to="/signup" className="inline-block bg-white text-blue-600 px-12 py-5 rounded-2xl text-xl font-black hover:scale-110 shadow-3xl transition-transform relative z-10">
+                    <button onClick={(e) => handleCtaClick(e, '/signup')} className="inline-block bg-white text-blue-600 px-12 py-5 rounded-2xl text-xl font-black hover:scale-110 shadow-3xl transition-transform relative z-10">
                         Create Your Free Account
-                    </Link>
+                    </button>
                 </div>
             </section>
         </div>

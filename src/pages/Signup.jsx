@@ -36,7 +36,7 @@ const Signup = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen pt-28 pb-12 flex items-center justify-center p-4 relative overflow-hidden">
             {/* Background Decorations */}
             <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-emerald-500/10 via-transparent to-blue-600/10 -z-10" />
             <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl -z-10 animate-pulse" />

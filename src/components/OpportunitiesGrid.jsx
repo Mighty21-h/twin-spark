@@ -173,26 +173,26 @@ const OpportunitiesGrid = ({ limit }) => {
                                     <h4 className="font-black text-gray-900 dark:text-white text-lg border-b border-gray-200 dark:border-gray-700 pb-2">Opportunity Details</h4>
                                     
                                     {getFormCategory(selectedOpp.type) === 'job' && (
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                                            <div>
-                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Job Title</p>
-                                                <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedOpp.jobTitle || selectedOpp.title}</p>
+                                        <div className="flex flex-wrap items-center gap-6 mb-4">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">Job Title</span>
+                                                <span className="text-sm font-bold text-gray-900 dark:text-white">{selectedOpp.jobTitle || selectedOpp.title}</span>
                                             </div>
-                                            <div>
-                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Job Type</p>
-                                                <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedOpp.type}</p>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">Job Type</span>
+                                                <span className="text-sm font-bold text-gray-900 dark:text-white">{selectedOpp.type}</span>
                                             </div>
-                                            <div>
-                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Applicant Need</p>
-                                                <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedOpp.applicantNeed || 'Both'}</p>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">Applicant Need</span>
+                                                <span className="text-sm font-bold text-gray-900 dark:text-white">{selectedOpp.applicantNeed || 'Both'}</span>
                                             </div>
-                                            <div>
-                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Salary</p>
-                                                <p className="text-sm font-bold text-emerald-600">{selectedOpp.salary || 'Not Specified'}</p>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">Salary</span>
+                                                <span className="text-sm font-bold text-emerald-600">{selectedOpp.salary || 'Not Specified'}</span>
                                             </div>
-                                            <div className="col-span-2">
-                                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Skills Required</p>
-                                                <p className="text-sm font-bold text-blue-600">{selectedOpp.skillRequired || selectedOpp.skills || 'General Skills'}</p>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">Skills Required</span>
+                                                <span className="text-sm font-bold text-blue-600">{selectedOpp.skillRequired || selectedOpp.skills || 'General Skills'}</span>
                                             </div>
                                         </div>
                                     )}
@@ -204,18 +204,18 @@ const OpportunitiesGrid = ({ limit }) => {
                                         </p>
                                     </div>
                                     
-                                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                        <div>
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Work Location</p>
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1">
+                                    <div className="flex flex-wrap items-center gap-8 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">Work Location</span>
+                                            <span className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1">
                                                 <FiMapPin className="text-blue-500" /> {selectedOpp.location || 'Online'}
-                                            </p>
+                                            </span>
                                         </div>
-                                        <div>
-                                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Deadline</p>
-                                            <p className="text-sm font-black text-red-500 flex items-center gap-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">Deadline</span>
+                                            <span className="text-sm font-black text-red-500 flex items-center gap-1">
                                                 <FiCalendar /> {new Date(selectedOpp.deadline).toLocaleDateString()}
-                                            </p>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

@@ -12,7 +12,7 @@ const COURSES = [
 ];
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const TIME_SLOTS = Array.from({ length: 17 }, (_, i) => `${i + 6}:00`); // 6:00 to 22:00
+const TIME_SLOTS = Array.from({ length: 17 }, (_, i) => `${((i + 12) % 12) || 12}:00 LT`); // Ethiopian Time formatting
 
 const COLORS = [
   "bg-blue-500", "bg-emerald-500", "bg-violet-500", "bg-amber-500", "bg-rose-500", "bg-cyan-500", "bg-fuchsia-500"
@@ -28,7 +28,7 @@ const StudyPlanner = () => {
   const [freeTime, setFreeTime] = useState({}); // { Monday: ["8:00", "9:00"], Tuesday: [...] }
   
   const [deadlines, setDeadlines] = useState([]);
-  const [newDeadline, setNewDeadline] = useState({ task: '', date: '' });
+  const [newDeadline, setNewDeadline] = useState({ task: '', date: '', completed: false });
   
   // Output
   const [schedule, setSchedule] = useState(null);
@@ -65,11 +65,15 @@ const StudyPlanner = () => {
   const addDeadline = () => {
     if (!newDeadline.task || !newDeadline.date) { toast.error("Both task and date are required."); return; }
     setDeadlines([...deadlines, { ...newDeadline, id: Date.now() }]);
-    setNewDeadline({ task: '', date: '' });
+    setNewDeadline({ task: '', date: '', completed: false });
   };
 
   const removeDeadline = (id) => {
     setDeadlines(deadlines.filter(d => d.id !== id));
+  };
+  
+  const toggleDeadlineStatus = (id) => {
+    setDeadlines(deadlines.map(d => d.id === id ? { ...d, completed: !d.completed } : d));
   };
 
   // ─── Generate Schedule Algorithm ─────────────────────────────────────────────
@@ -137,18 +141,31 @@ const StudyPlanner = () => {
               </h3>
               
               <div className="space-y-3">
-                <div className="relative">
-                  <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input value={courseSearch} onChange={e => setCourseSearch(e.target.value)} placeholder="Search courses..." className="w-full pl-11 pr-4 py-3 bg-gray-100/50 dark:bg-gray-800/50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 font-medium dark:text-white" />
-                  {courseSearch && filteredCourses.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl z-10 max-h-48 overflow-y-auto p-2">
-                      {filteredCourses.map(c => (
-                        <button key={c} onClick={() => addCourse(c)} className="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg text-sm font-medium dark:text-gray-200">
-                          {c}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input 
+                      value={courseSearch} 
+                      onChange={e => setCourseSearch(e.target.value)} 
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && courseSearch.trim()) {
+                          addCourse(courseSearch.trim());
+                        }
+                      }}
+                      placeholder="Search or add custom course..." 
+                      className="w-full pl-11 pr-4 py-3 bg-gray-100/50 dark:bg-gray-800/50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 font-medium dark:text-white" 
+                    />
+                    {courseSearch && filteredCourses.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl z-10 max-h-48 overflow-y-auto p-2">
+                        {filteredCourses.map(c => (
+                          <button key={c} onClick={() => addCourse(c)} className="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg text-sm font-medium dark:text-gray-200">
+                            {c}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <button onClick={() => { if(courseSearch.trim()) addCourse(courseSearch.trim()) }} className="bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl transition-colors min-w-[3rem] flex items-center justify-center"><FiPlus /></button>
                 </div>
                 
                 <div className="flex flex-wrap gap-2">
@@ -177,16 +194,28 @@ const StudyPlanner = () => {
                   <button onClick={addDeadline} className="bg-violet-600 hover:bg-violet-500 text-white p-3 rounded-xl transition-colors"><FiPlus /></button>
                 </div>
                 
-                <div className="space-y-2">
-                  {deadlines.map(d => (
-                    <div key={d.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
-                      <div>
-                        <p className="font-bold text-sm dark:text-white">{d.task}</p>
-                        <p className="text-xs text-red-500 font-bold mt-0.5">{new Date(d.date).toLocaleDateString()}</p>
+                <div className="space-y-3">
+                  {deadlines.map(d => {
+                    const isOverdue = new Date(d.date) < new Date(new Date().setHours(0,0,0,0)) && !d.completed;
+                    return (
+                      <div key={d.id} className={`flex justify-between items-center p-3 rounded-xl border transition-colors ${d.completed ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-500/30 opacity-70' : isOverdue ? 'bg-red-50 dark:bg-red-900/10 border-red-500/50 scale-105 shadow-xl shadow-red-500/10' : 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 hover:border-violet-500/30'}`}>
+                        <div>
+                          <p className={`font-bold text-sm transition-all ${d.completed ? 'line-through text-gray-400' : isOverdue ? 'text-red-700 dark:text-red-400' : 'dark:text-white'}`}>{d.task}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className={`text-xs font-bold ${isOverdue ? 'text-red-500' : 'text-gray-500'}`}>{new Date(d.date).toLocaleDateString()}</p>
+                            {isOverdue && <span className="text-[10px] text-white font-black uppercase tracking-widest px-2 py-0.5 bg-red-500 rounded whitespace-nowrap animate-pulse">Uncompleted Task</span>}
+                            {d.completed && <span className="text-[10px] text-emerald-600 font-black uppercase tracking-widest px-2 py-0.5 bg-emerald-500/20 rounded">Completed</span>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button onClick={() => toggleDeadlineStatus(d.id)} className={`p-2 rounded-lg transition-colors ${d.completed ? 'text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20' : 'text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10'}`}>
+                            <FiCheckCircle className="w-5 h-5" />
+                          </button>
+                          <button onClick={() => removeDeadline(d.id)} className={`transition-colors p-2 rounded-lg ${isOverdue ? 'text-red-400 hover:text-red-600 hover:bg-red-500/10' : 'text-gray-400 hover:text-red-500 hover:bg-red-500/10'}`}><FiTrash2 className="w-5 h-5" /></button>
+                        </div>
                       </div>
-                      <button onClick={() => removeDeadline(d.id)} className="text-gray-400 hover:text-red-500 transition-colors p-2"><FiTrash2 /></button>
-                    </div>
-                  ))}
+                    );
+                  })}
                   {deadlines.length === 0 && <p className="text-gray-400 text-sm font-medium">No impending deadlines.</p>}
                 </div>
               </div>
