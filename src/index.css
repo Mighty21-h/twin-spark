@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: 37, 99, 235;
+    --secondary: 16, 185, 129;
+    --accent: 245, 158, 11;
+    --background: 249, 250, 251;
+    --foreground: 17, 24, 39;
+    --card: 255, 255, 255;
+    --card-foreground: 17, 24, 39;
+    --border: 229, 231, 235;
+  }
+
+  .dark {
+    --background: 17, 24, 39;
+    --foreground: 249, 250, 251;
+    --card: 31, 41, 55;
+    --card-foreground: 249, 250, 251;
+    --border: 55, 65, 81;
+  }
+
+  body {
+    @apply bg-[rgb(var(--background))] text-[rgb(var(--foreground))] transition-colors duration-300;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border border-white/20 dark:border-gray-800/30 shadow-xl;
+  }
+
+  .premium-gradient {
+    @apply bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-all duration-300 transform hover:-translate-y-1 active:scale-95 shadow-lg hover:shadow-blue-500/25;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-2xl transition-all duration-300 transform hover:-translate-y-1 active:scale-95 shadow-lg hover:shadow-emerald-500/25;
+  }
+}
