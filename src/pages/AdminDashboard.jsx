@@ -131,7 +131,7 @@ const AdminDashboard = () => {
   // Auth guard
   useEffect(() => {
     if (!user) { navigate('/login'); return; }
-    if (user.role !== 'admin') { navigate('/dashboard'); return; }
+    if (user.role !== 'admin') { navigate('/gpa-prediction'); return; }
   }, [user, navigate]);
 
   useEffect(() => {
@@ -146,8 +146,8 @@ const AdminDashboard = () => {
         <div className="text-center space-y-4">
           <FiShield className="text-red-500 text-7xl mx-auto" />
           <h1 className="text-4xl font-black text-white">403 — Admin Only</h1>
-          <Link to="/dashboard" className="inline-block mt-4 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-500 transition-colors">
-            Go to Dashboard
+          <Link to="/gpa-prediction" className="inline-block mt-4 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-500 transition-colors">
+            Go to User Services
           </Link>
         </div>
       </div>
@@ -278,8 +278,8 @@ const AdminDashboard = () => {
         </nav>
 
         <div className="p-4 border-t border-slate-800">
-          <Link to="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/60 hover:text-white font-semibold text-sm transition-all">
-            <FiGrid /> User Dashboard
+          <Link to="/gpa-prediction" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/60 hover:text-white font-semibold text-sm transition-all">
+            <FiGrid /> User Services
           </Link>
           <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 font-semibold text-sm transition-all mt-1">
             <FiLogOut /> Logout

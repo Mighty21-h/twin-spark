@@ -26,7 +26,7 @@ const Navbar = () => {
 
     const navLinks = [
         { label: 'Language Learning', to: '/language', icon: <FiGlobe /> },
-        { label: 'GPA Prediction', to: '/dashboard', icon: <FiTrendingUp /> },
+        { label: 'GPA Prediction', to: '/gpa-prediction', icon: <FiTrendingUp /> },
         { label: 'Study Planner', to: '/study-planner', icon: <FiBookOpen /> },
         { label: 'Opportunities', to: '/opportunities', icon: <FiSearch /> },
     ];
@@ -122,7 +122,6 @@ const Navbar = () => {
                                             <p className="text-xs text-gray-400 font-medium">@{user.username}</p>
                                         </div>
                                         {[
-                                            { label: 'Overview', to: '/dashboard', icon: <FiLayout /> },
                                             { label: 'My Learning', to: '/language', icon: <FiBookOpen /> },
                                             { label: 'Opportunities', to: '/opportunities', icon: <FiBriefcase /> },
                                             { label: 'Favorites', to: '/profile', icon: <FiStar /> },

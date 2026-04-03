@@ -18,7 +18,7 @@ const Login = () => {
         try {
             await login(username, password);
             toast.success('Welcome back!');
-            navigate('/dashboard');
+            navigate('/gpa-prediction');
         } catch (error) {
             toast.error(error.message || 'Login failed');
         } finally {

@@ -20,7 +20,11 @@ export const mockOpportunities = [
         category: "Tech",
         description: "Join the largest telecom in Ethiopia for a 3-month summer internship program.",
         deadline: "2024-06-30",
-        posted_at: "2024-03-20"
+        posted_at: "2024-03-20",
+        jobTitle: "Software Engineering Intern",
+        applicantNeed: "Both",
+        salary: "Fixed Rate (4500.00 ETB)",
+        skillRequired: "React, Node.js, basic Python"
     },
     {
         id: 2,
@@ -42,7 +46,11 @@ export const mockOpportunities = [
         category: "Tech",
         description: "Opportunity for fresh graduates to kickstart their career in MERN stack development.",
         deadline: "2024-04-10",
-        posted_at: "2024-03-25"
+        posted_at: "2024-03-25",
+        jobTitle: "Junior Web Developer",
+        applicantNeed: "Both",
+        salary: "Monthly (12,000 ETB)",
+        skillRequired: "MERN Stack, Git, Agile"
     },
     {
         id: 4,
@@ -53,7 +61,11 @@ export const mockOpportunities = [
         category: "Research",
         description: "Collaborate on groundbreaking health informatics research.",
         deadline: "2024-04-30",
-        posted_at: "2024-03-26"
+        posted_at: "2024-03-26",
+        jobTitle: "Research Data Analyst",
+        applicantNeed: "Female",
+        salary: "Contract",
+        skillRequired: "SPSS, Python, Data Visualization"
     }
 ];
 

@@ -6,7 +6,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import Dashboard from './pages/Dashboard';
+import GPAPrediction from './pages/GPAPrediction';
 import Opportunities from './pages/Opportunities';
 import AdminDashboard from './pages/AdminDashboard';
 import VerifyEmail from './pages/VerifyEmail';
@@ -33,10 +33,10 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/verify-email/:token" element={<VerifyEmail />} />
           <Route
-            path="/dashboard"
+            path="/gpa-prediction"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <GPAPrediction />
               </ProtectedRoute>
             }
           />
