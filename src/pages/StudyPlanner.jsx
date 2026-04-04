@@ -13,7 +13,11 @@ const COURSES = [
 ];
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const TIME_SLOTS = Array.from({ length: 17 }, (_, i) => `${((i + 12) % 12) || 12}:00 LT`); // Ethiopian Time formatting
+const TIME_SLOTS = [
+  "12:00 Morning", "1:00 LT", "2:00 LT", "3:00 LT", "4:00 LT", "5:00 LT", "6:00 Midday",
+  "7:00 LT", "8:00 LT", "9:00 LT", "10:00 LT", "11:00 LT", "12:00 Night",
+  "1:00 Night", "2:00 Night", "3:00 Night", "4:00 Night"
+];
 
 const COLORS = [
   "bg-blue-500", "bg-emerald-500", "bg-violet-500", "bg-amber-500", "bg-rose-500", "bg-cyan-500", "bg-fuchsia-500"
@@ -35,8 +39,13 @@ const StudyPlanner = () => {
   const [schedule, setSchedule] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const [selectedWeek, setSelectedWeek] = useState("This Week (Apr 5 - Apr 11)");
+  
   // ─── Course Selection ────────────────────────────────────────────────────────
-  const filteredCourses = COURSES.filter(c => c.toLowerCase().includes(courseSearch.toLowerCase()) && !selectedCourses.includes(c));
+  const filteredCourses = COURSES.filter(c => 
+    c.toLowerCase().includes(courseSearch.toLowerCase()) && 
+    !selectedCourses.some(sc => sc.name === c)
+  );
 
   const addCourse = (c) => {
     if (selectedCourses.length >= 7) { toast.error("Maximum 7 courses allowed."); return; }
@@ -77,58 +86,93 @@ const StudyPlanner = () => {
     setDeadlines(deadlines.map(d => d.id === id ? { ...d, completed: !d.completed } : d));
   };
 
-  // ─── Generate Schedule Algorithm ─────────────────────────────────────────────
-  const generateSchedule = () => {
-    if (selectedCourses.length === 0) { toast.error("Please add at least one course."); return; }
-    
+  // ─── Generate Schedule AI Integration ─────────────────────────────────────────────
+  const generateSchedule = async () => {
+    console.log("🚀 [STUDY PLANNER] Generate Button Clicked!");
+    // alert("AI Generation Started! Check your console (F12) for details."); // Temporary debug alert
+
+    if (!user) {
+      toast.error("Please login to generate a schedule.");
+      return;
+    }
+    if (selectedCourses.length === 0) {
+      toast.error("Please add at least one course first.");
+      return;
+    }
+
     setIsGenerating(true);
-    
-    setTimeout(() => {
-      // Mock Scheduling Algorithm
-      // In reality, this would distribute study hours based on credits/difficulty + deadlines
-      // We will place course blocks into available free time slots
-      
-      const newSchedule = { ...freeTime }; // Start with all free slots
-      for (const day in newSchedule) {
-        newSchedule[day] = newSchedule[day].map((time, index) => { // Map time strings to objects
-           // Only assign study blocks to roughly 60% of free time, round robin through courses
-           if (Math.random() > 0.4) {
-               const course = selectedCourses[index % selectedCourses.length];
-               return { time, ...course, type: 'study' };
-           }
-           // Assign deadline work if close (mock logic)
-           if (deadlines.length > 0 && Math.random() > 0.8) {
-               const dl = deadlines[Math.floor(Math.random() * deadlines.length)];
-               return { time, name: dl.task, color: 'bg-red-500', type: 'deadline' };
-           }
-           return { time, type: 'free' };
-        });
-        
-        // Fill in non-free slots as unavailable
-        const fullDaySchedule = [];
-        for (const time of TIME_SLOTS) {
-            const scheduledSlot = newSchedule[day].find(s => s.time === time);
-            if (scheduledSlot) fullDaySchedule.push(scheduledSlot);
-            else fullDaySchedule.push({ time, type: 'unavailable' });
-        }
-        newSchedule[day] = fullDaySchedule;
+    try {
+      const token = encodeURIComponent(JSON.stringify(user));
+      const response = await fetch('http://localhost:5000/api/ai/generate-schedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          selectedCourses,
+          freeTime,
+          deadlines,
+          week: selectedWeek
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Server Error (${response.status})`);
       }
-      
-      setSchedule(newSchedule);
+
+      const result = await response.json();
+      console.log("✅ [STUDY PLANNER] Generation result:", result);
+
+      if (result.success && result.schedule) {
+        setSchedule(result.schedule);
+        toast.success(result.message || "AI Schedule generated successfully! 🧠");
+        
+        // Ensure the ID exists before scrolling
+        setTimeout(() => {
+          const element = document.getElementById('generated-schedule');
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          } else {
+            console.warn("⚠️ [STUDY PLANNER] 'generated-schedule' element not found in DOM.");
+          }
+        }, 300);
+      } else {
+        toast.error(result.message || "Failed to generate schedule.");
+      }
+    } catch (error) {
+      console.error("Schedule Gen Error:", error);
+      toast.error("Network error while communicating with AI.");
+    } finally {
       setIsGenerating(false);
-      toast.success("Smart schedule generated successfully! 🧠");
-    }, 1500); // Fake delay for UX
+    }
   };
 
   return (
     <div className="min-h-screen pt-28 pb-12 px-4 sm:px-6 lg:px-8 bg-[rgb(var(--background))]">
       <div className="max-w-7xl mx-auto space-y-12">
-        <div className="space-y-4">
-          <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white flex items-center gap-4">
-            <FiCalendar className="text-blue-600" /> Study Planner
-          </h1>
-          <p className="text-xl text-gray-500 font-medium tracking-tight">AI-powered weekly schedule generation based on your availability and deadlines.</p>
-        </div>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-2">
+              <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white flex items-center gap-4">
+                <FiCalendar className="text-blue-600" /> Study Planner
+              </h1>
+              <p className="text-lg text-gray-500 font-medium tracking-tight">AI-powered weekly schedule generation based on your availability and deadlines.</p>
+            </div>
+            
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 px-2 ml-1">Select Study Week</label>
+              <select 
+                value={selectedWeek} 
+                onChange={(e) => setSelectedWeek(e.target.value)}
+                className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white"
+              >
+                <option>This Week (Apr 5 - Apr 11)</option>
+                <option>Next Week (Apr 12 - Apr 18)</option>
+                <option>Finals Week (May 24 - May 30)</option>
+              </select>
+            </div>
+          </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* ── Inputs Panel ── */}
@@ -252,16 +296,16 @@ const StudyPlanner = () => {
                   </thead>
                   <tbody>
                     {TIME_SLOTS.map(time => (
-                      <tr key={time}>
-                        <td className="p-2 text-xs font-bold text-gray-400 text-right whitespace-nowrap">{time}</td>
+                      <tr key={`matrix-${time}`}>
+                        <td className="p-2 text-[10px] font-black text-gray-400 dark:text-gray-500 text-right whitespace-nowrap uppercase tracking-tighter">{time}</td>
                         {DAYS.map(day => (
-                          <td key={`${day}-${time}`} className="p-1">
+                          <td key={`matrix-${day}-${time}`} className="p-1">
                             <button
                               onClick={() => toggleTimeSlot(day, time)}
-                              className={`w-full h-8 rounded-md transition-all ${
+                              className={`w-full h-8 rounded-lg transition-all ${
                                 isSlotSelected(day, time)
-                                  ? 'bg-blue-500/20 border border-blue-500'
-                                  : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                  ? 'bg-blue-500/20 border border-blue-500 shadow-sm shadow-blue-500/10'
+                                  : 'bg-gray-50 dark:bg-gray-800/40 border border-transparent hover:border-gray-200 dark:hover:border-gray-700'
                               }`}
                             />
                           </td>
@@ -275,19 +319,28 @@ const StudyPlanner = () => {
               <div className="pt-4 flex justify-end gap-4 border-t border-gray-100 dark:border-gray-800">
                 <button onClick={() => setFreeTime({})} className="px-6 py-3 font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors">Clear</button>
                 <button 
-                  onClick={generateSchedule} 
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    generateSchedule();
+                  }}
                   disabled={isGenerating || selectedCourses.length === 0}
-                  className="premium-gradient px-8 py-3 rounded-xl text-white font-black hover:shadow-lg hover:shadow-blue-500/30 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="premium-gradient w-full md:w-auto px-8 py-4 rounded-2xl text-white font-black hover:shadow-2xl hover:shadow-blue-500/40 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
                 >
-                  {isGenerating ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <FiTarget />}
-                  GENERATE SCHEDULE
+                  <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                  {isGenerating ? (
+                    <div className="w-6 h-6 border-[3px] border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <FiTarget className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                  )}
+                  <span className="text-base uppercase tracking-widest">Generate Schedule</span>
                 </button>
               </div>
             </div>
 
             {/* Step 4: Generated Schedule */}
             {schedule && (
-              <div className="glass-card rounded-[2.5rem] p-8 space-y-6 animate-slide-in-left">
+              <div id="generated-schedule" className="glass-card rounded-[2.5rem] p-8 space-y-6 animate-slide-in-left border-2 border-blue-500/20 shadow-2xl shadow-blue-500/10 scroll-mt-24">
                 <h3 className="text-2xl font-black flex items-center gap-3">
                   🪄 Your Smart Schedule
                 </h3>
@@ -305,7 +358,7 @@ const StudyPlanner = () => {
                     <tbody>
                       {TIME_SLOTS.map(time => (
                         <tr key={`row-${time}`}>
-                          <td className="p-2 text-xs font-bold text-gray-400 text-right whitespace-nowrap align-top pt-3">{time}</td>
+                        <td className="p-2 text-[10px] font-black text-gray-400 dark:text-gray-500 text-right whitespace-nowrap align-top pt-3 uppercase tracking-tighter">{time}</td>
                           {DAYS.map(day => {
                             const slot = schedule[day]?.find(s => s.time === time);
                             if (!slot) return <td key={`null-${day}-${time}`} />;

@@ -11,6 +11,11 @@ const FeedbackSection = ({ category }) => {
     const [submitted, setSubmitted] = useState(false);
 
     const handleSubmit = async () => {
+        if (!user) {
+            toast.error("Please login to submit feedback.");
+            return;
+        }
+
         if (!type && !comment) {
             toast.error("Please provide a like/dislike or a comment.");
             return;
@@ -18,8 +23,8 @@ const FeedbackSection = ({ category }) => {
 
         setIsSubmitting(true);
         try {
-            // We use the token from localStorage (AuthContext provides user but let's assume valid token is available)
-            const token = localStorage.getItem('token') || ''; 
+            // Generate mock token (encoded user object) as used across the platform
+            const token = encodeURIComponent(JSON.stringify(user)); 
 
             const response = await fetch('http://localhost:5000/api/feedback/submit', {
                 method: 'POST',

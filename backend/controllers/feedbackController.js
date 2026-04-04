@@ -9,19 +9,23 @@ const submitFeedback = async (req, res) => {
             return res.status(400).json({ success: false, message: "Category and Type are required." });
         }
 
-        // We check if the table exists or not is not ideal, but for hackathon let's just try inserting.
-        // We ensure table exists:
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS feedbacks (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id INT NOT NULL,
-                category VARCHAR(255) NOT NULL,
-                type ENUM('like', 'dislike') NOT NULL,
-                comment TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
+        // --- STEP 1: ROBUST INITIALIZATION ---
+        try {
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS feedbacks (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT NOT NULL,
+                    category VARCHAR(255) NOT NULL,
+                    type ENUM('like', 'dislike') NOT NULL,
+                    comment TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+        } catch (initErr) {
+            console.error("Feedback Table Init Error (skipping if exists):", initErr.message);
+        }
 
+        // --- STEP 2: INSERT FEEDBACK ---
         await pool.query(
             'INSERT INTO feedbacks (user_id, category, type, comment) VALUES (?, ?, ?, ?)',
             [userId, category, type, comment || '']

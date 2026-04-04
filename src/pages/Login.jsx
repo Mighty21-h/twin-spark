@@ -16,9 +16,13 @@ const Login = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await login(username, password);
+            const { user } = await login(username, password);
             toast.success('Welcome back!');
-            navigate('/');
+            if (user.role === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
         } catch (error) {
             toast.error(error.message || 'Login failed');
         } finally {

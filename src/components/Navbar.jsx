@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FiMenu, FiSun, FiMoon, FiSearch, FiLogOut, FiChevronDown, FiTrendingUp, FiGlobe, FiX, FiLayout, FiBookOpen, FiBriefcase, FiStar, FiSettings, FiCpu } from 'react-icons/fi';
+import { FiMenu, FiSun, FiMoon, FiSearch, FiLogOut, FiChevronDown, FiTrendingUp, FiGlobe, FiX, FiLayout, FiBookOpen, FiBriefcase, FiStar, FiSettings, FiCpu, FiMessageSquare } from 'react-icons/fi';
 import { MdNotifications } from 'react-icons/md';
 
 const Navbar = () => {
@@ -58,6 +58,7 @@ const Navbar = () => {
     const navLinks = [
         { label: 'Language Learning', to: '/language', icon: <FiGlobe /> },
         { label: 'AI Language Tutor', to: '/language-tutor', icon: <FiCpu className="text-indigo-500" /> },
+        { label: 'AI Assistant', to: '/assistant', icon: <FiMessageSquare className="text-purple-500" /> },
         { label: 'GPA Prediction', to: '/gpa-prediction', icon: <FiTrendingUp /> },
         { label: 'Study Planner', to: '/study-planner', icon: <FiBookOpen /> },
         { label: 'Opportunities', to: '/opportunities', icon: <FiSearch /> },
@@ -87,25 +88,27 @@ const Navbar = () => {
                     <div className="hidden lg:flex items-center space-x-8">
                         <Link to="/" className="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors uppercase tracking-widest">Home</Link>
                         
-                        <div className="relative group">
-                            <button className="flex items-center gap-1 text-sm font-bold text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors uppercase tracking-widest">
-                                Service <FiChevronDown className="group-hover:rotate-180 transition-transform" />
-                            </button>
-                            <div className="absolute top-full left-0 mt-2 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                                <div className="glass-card rounded-2xl shadow-2xl p-4 space-y-1">
-                                    {navLinks.map((item) => (
-                                        <Link
-                                            key={item.label}
-                                            to={item.to}
-                                            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition-all"
-                                        >
-                                            <span className="text-lg">{item.icon}</span>
-                                            {item.label}
-                                        </Link>
-                                    ))}
+                        {(!user || user.role !== 'admin') && (
+                            <div className="relative group">
+                                <button className="flex items-center gap-1 text-sm font-bold text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors uppercase tracking-widest">
+                                    Service <FiChevronDown className="group-hover:rotate-180 transition-transform" />
+                                </button>
+                                <div className="absolute top-full left-0 mt-2 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                                    <div className="glass-card rounded-2xl shadow-2xl p-4 space-y-1">
+                                        {navLinks.map((item) => (
+                                            <Link
+                                                key={item.label}
+                                                to={item.to}
+                                                className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition-all"
+                                            >
+                                                <span className="text-lg">{item.icon}</span>
+                                                {item.label}
+                                            </Link>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
 
                         <Link to="/about" className="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors uppercase tracking-widest">About Us</Link>
                         <Link to="/contact" className="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-blue-600 transition-colors uppercase tracking-widest">Contact Us</Link>
@@ -144,7 +147,13 @@ const Navbar = () => {
                                         <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">@{user.username}</p>
                                     </div>
                                     <img
-                                        src={user?.profile_picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username || user.name}`}
+                                        src={(() => {
+                                            try {
+                                                const settings = JSON.parse(localStorage.getItem(`bilih_settings_${user.username}`)) || { privacy: true };
+                                                if (!settings.privacy) return `https://api.dicebear.com/7.x/initials/svg?seed=${user.username || user.name}`;
+                                            } catch (e) {}
+                                            return user?.profile_picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username || user.name}`;
+                                        })()}
                                         alt="Profile"
                                         className="w-10 h-10 rounded-2xl object-cover ring-2 ring-blue-500/20 hover:ring-blue-500 transition-all"
                                     />
@@ -157,21 +166,31 @@ const Navbar = () => {
                                             <p className="text-sm font-black text-gray-900 dark:text-white">{user.name}</p>
                                             <p className="text-xs text-gray-400 font-medium">@{user.username}</p>
                                         </div>
-                                        {[
-                                            { label: 'My Learning', to: '/language', icon: <FiBookOpen /> },
-                                            { label: 'Opportunities', to: '/opportunities', icon: <FiBriefcase /> },
-                                            { label: 'Favorites', to: '/profile', icon: <FiStar /> },
-                                            { label: 'Settings', to: '/profile', icon: <FiSettings /> },
-                                        ].map((item) => (
+                                        {user.role === 'admin' ? (
                                             <Link
-                                                key={item.label}
-                                                to={item.to}
-                                                className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition-all"
+                                                to="/admin"
+                                                className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 text-sm font-bold text-blue-600 transition-all"
                                             >
-                                                <span className="text-base">{item.icon}</span>
-                                                {item.label}
+                                                <span className="text-base"><FiLayout /></span>
+                                                Admin Dashboard
                                             </Link>
-                                        ))}
+                                        ) : (
+                                            [
+                                                { label: 'My Learning', to: '/language', icon: <FiBookOpen /> },
+                                                { label: 'Opportunities', to: '/opportunities', icon: <FiBriefcase /> },
+                                                { label: 'Favorites', to: '/profile', icon: <FiStar /> },
+                                                { label: 'Settings', to: '/profile', icon: <FiSettings /> },
+                                            ].map((item) => (
+                                                <Link
+                                                    key={item.label}
+                                                    to={item.to}
+                                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 text-sm font-bold text-gray-600 dark:text-gray-300 hover:text-blue-600 transition-all"
+                                                >
+                                                    <span className="text-base">{item.icon}</span>
+                                                    {item.label}
+                                                </Link>
+                                            ))
+                                        )}
                                         <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
                                             <button
                                                 onClick={logout}
@@ -216,22 +235,24 @@ const Navbar = () => {
                             </button>
                         </div>
 
-                        <div className="space-y-4">
-                            <p className="text-xs font-black text-gray-400 uppercase tracking-widest px-4">Services</p>
-                            <div className="space-y-2">
-                                {navLinks.map((link) => (
-                                    <Link
-                                        key={link.label}
-                                        to={link.to}
-                                        onClick={() => setIsDrawerOpen(false)}
-                                        className="flex items-center gap-4 px-6 py-4 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-700 dark:text-gray-200 font-bold transition-all group"
-                                    >
-                                        <span className="text-2xl group-hover:scale-110 transition-transform">{link.icon}</span>
-                                        {link.label}
-                                    </Link>
-                                ))}
+                        {(!user || user.role !== 'admin') && (
+                            <div className="space-y-4">
+                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest px-4">Services</p>
+                                <div className="space-y-2">
+                                    {navLinks.map((link) => (
+                                        <Link
+                                            key={link.label}
+                                            to={link.to}
+                                            onClick={() => setIsDrawerOpen(false)}
+                                            className="flex items-center gap-4 px-6 py-4 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-700 dark:text-gray-200 font-bold transition-all group"
+                                        >
+                                            <span className="text-2xl group-hover:scale-110 transition-transform">{link.icon}</span>
+                                            {link.label}
+                                        </Link>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <div className="pt-8 border-t border-gray-100 dark:border-gray-800 space-y-4">
                             <Link to="/about" onClick={() => setIsDrawerOpen(false)} className="block px-6 py-2 text-gray-500 font-bold hover:text-blue-600 transition-colors uppercase tracking-widest text-sm">About Us</Link>

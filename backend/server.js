@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const axios = require('axios');
 require('dotenv').config();
 
 const aiRoutes = require('./routes/aiRoutes');
@@ -21,6 +22,12 @@ app.use('/api/languages', languageRoutes);
 // Base route for sanity check
 app.get('/', (req, res) => {
     res.send('Bilih Smart Link Backend Engine is active.');
+});
+
+// Mock Chat Integration (Replaces Gemini)
+app.post('/api/chat', async (req, res) => {
+    const { message } = req.body;
+    res.json({ reply: "This is a simulated AI assistant response. The Gemini backend has been removed as requested." });
 });
 
 // Start Server

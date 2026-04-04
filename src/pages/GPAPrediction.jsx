@@ -23,6 +23,12 @@ const GPAPrediction = () => {
     // Output State
     const [calculatedGPA, setCalculatedGPA] = useState(null);
     const [hasCalculated, setHasCalculated] = useState(false);
+    const [isAILoading, setIsAILoading] = useState(false);
+    const [suggestions, setSuggestions] = useState({
+        skills: ['Advanced Data Structures', 'Tech Entrepreneurship', 'AI Ethics Seminar', 'Cloud Computing Sys'],
+        courses: ['Deep Learning', 'Human-Computer Interaction', 'Distributed Systems'],
+        languages: ['English (Technical Writing)', 'Amharic (Business Context)']
+    });
 
     // Dynamic Handlers
     const addCourse = () => setCourses([...courses, { id: Date.now(), name: '', credit: '' }]);
@@ -49,6 +55,36 @@ const GPAPrediction = () => {
         
         setCalculatedGPA(newGpa.toFixed(2));
         setHasCalculated(true);
+        fetchAISuggestions(newGpa.toFixed(2));
+    };
+
+    const fetchAISuggestions = async (gpa) => {
+        if (!user) return;
+        setIsAILoading(true);
+        try {
+            const token = encodeURIComponent(JSON.stringify(user));
+            const response = await fetch('http://localhost:5000/api/ai/gpa-suggestions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    department,
+                    semester,
+                    currentGPA: gpa,
+                    courses: courses.map(c => ({ name: c.name }))
+                })
+            });
+            const result = await response.json();
+            if (result.success && result.data) {
+                setSuggestions(result.data);
+            }
+        } catch (error) {
+            console.error("AI Fetch error:", error);
+        } finally {
+            setIsAILoading(false);
+        }
     };
 
     // Calculate Advice based on user's exact specification logic
@@ -228,19 +264,50 @@ const GPAPrediction = () => {
                                 </div>
 
                                 {/* Suggested Courses mapping */}
-                                <div className="glass-card rounded-[2rem] p-8 border border-gray-100 dark:border-gray-800">
-                                    <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">Suggested Courses Map</h3>
-                                    <p className="text-sm text-gray-500 font-medium mb-6">Based on your calculated progression in <span className="font-bold text-gray-900 dark:text-white">{department}</span>, consider adding these electives block to boost your aggregate:</p>
+                                <div className="glass-card rounded-[2rem] p-8 border border-gray-100 dark:border-gray-800 relative overflow-hidden">
+                                    {isAILoading && (
+                                        <div className="absolute inset-0 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm z-20 flex flex-col items-center justify-center transition-all">
+                                            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
+                                            <p className="font-black text-blue-600 animate-pulse uppercase tracking-widest text-xs">AI Consulting...</p>
+                                        </div>
+                                    )}
+                                    <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">AI Suggested Roadmap</h3>
+                                    <p className="text-sm text-gray-500 font-medium mb-6">Based on your calculated progression in <span className="font-bold text-gray-900 dark:text-white">{department}</span>, Gemini suggests these focuses:</p>
                                     
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {['Advanced Data Structures (4 Cr)', 'Tech Entrepreneurship (3 Cr)', 'AI Ethics Seminar (2 Cr)', 'Cloud Computing Sys (3 Cr)'].map((sc, i) => (
-                                            <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
-                                                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 font-black">
-                                                    #{i+1}
-                                                </div>
-                                                <span className="font-bold text-sm text-gray-700 dark:text-gray-300">{sc}</span>
+                                    <div className="space-y-6">
+                                        <div>
+                                            <p className="text-[10px] font-black uppercase text-blue-500 tracking-widest mb-3">Recommended Skills</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {suggestions.skills.map((s, i) => (
+                                                    <span key={i} className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-xl text-xs font-bold border border-blue-100 dark:border-blue-800/50">
+                                                        {s}
+                                                    </span>
+                                                ))}
                                             </div>
-                                        ))}
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <p className="text-[10px] font-black uppercase text-indigo-500 tracking-widest mb-3">Elective Courses</p>
+                                                <div className="space-y-2">
+                                                    {suggestions.courses.map((c, i) => (
+                                                        <div key={i} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
+                                                            {c}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black uppercase text-emerald-500 tracking-widest mb-3">Language Focus</p>
+                                                <div className="space-y-2">
+                                                    {suggestions.languages.map((l, i) => (
+                                                        <div key={i} className="p-3 bg-emerald-50 dark:bg-emerald-900/10 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/20">
+                                                            {l}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 

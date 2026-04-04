@@ -13,7 +13,11 @@ const Home = () => {
     const handleCtaClick = (e, path) => {
         if (user) {
             e.preventDefault();
-            toast('You have already an account', { icon: 'ℹ️' });
+            if (user.role === 'admin') {
+                navigate('/admin');
+            } else {
+                toast('You have already an account', { icon: 'ℹ️' });
+            }
         } else {
             navigate(path);
         }
@@ -42,7 +46,7 @@ const Home = () => {
                         
                         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-8">
                             <button onClick={(e) => handleCtaClick(e, '/signup')} className="btn-primary flex items-center gap-3 text-lg group">
-                                Get Started Free <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                                {user?.role === 'admin' ? 'Access Admin Dashboard' : 'Get Started Free'} <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
                             </button>
                             <Link to="/opportunities" className="px-8 py-4 rounded-2xl font-bold border-2 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-lg">
                                 Explore Opportunities
@@ -104,7 +108,7 @@ const Home = () => {
                     <h2 className="text-4xl md:text-6xl font-black mb-8 relative z-10">Join the Future of Education in Ethiopia</h2>
                     <p className="text-xl md:text-2xl mb-12 opacity-90 relative z-10">Over 10,000 students are already leveling up their careers with BILIH.</p>
                     <button onClick={(e) => handleCtaClick(e, '/signup')} className="inline-block bg-white text-blue-600 px-12 py-5 rounded-2xl text-xl font-black hover:scale-110 shadow-3xl transition-transform relative z-10">
-                        Create Your Free Account
+                        {user?.role === 'admin' ? 'Go to Administrator Panel' : 'Create Your Free Account'}
                     </button>
                 </div>
             </section>

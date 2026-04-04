@@ -19,6 +19,7 @@ import Notifications from './pages/Notifications';
 import StudyPlanner from './pages/StudyPlanner';
 import ProtectedRoute from './components/ProtectedRoute';
 import Profile from './pages/Profile';
+import Assistant from './pages/Assistant';
 import Footer from './components/Footer';
 
 function App() {
@@ -38,7 +39,7 @@ function App() {
           <Route
             path="/gpa-prediction"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole="user">
                 <GPAPrediction />
               </ProtectedRoute>
             }
@@ -46,7 +47,7 @@ function App() {
           <Route
             path="/opportunities"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole="user">
                 <Opportunities />
               </ProtectedRoute>
             }
@@ -54,7 +55,7 @@ function App() {
           <Route
             path="/language"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole="user">
                 <LanguageLearning />
               </ProtectedRoute>
             }
@@ -62,7 +63,7 @@ function App() {
           <Route
             path="/language-tutor"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole="user">
                 <LanguageTutor />
               </ProtectedRoute>
             }
@@ -70,7 +71,7 @@ function App() {
           <Route
             path="/notifications"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole="user">
                 <Notifications />
               </ProtectedRoute>
             }
@@ -78,13 +79,35 @@ function App() {
           <Route
             path="/study-planner"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredRole="user">
                 <StudyPlanner />
               </ProtectedRoute>
             }
           />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route
+            path="/assistant"
+            element={
+              <ProtectedRoute requiredRole="user">
+                <Assistant />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute requiredRole="user">
+                <Profile />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/contact" element={<ContactUs />} />
         </Routes>

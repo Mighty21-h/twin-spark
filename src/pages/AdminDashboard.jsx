@@ -71,7 +71,7 @@ const SidebarItem = ({ icon, label, active, onClick, badge }) => (
     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
       active
         ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-        : 'text-slate-400 hover:bg-slate-700/60 hover:text-white'
+        : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700/60 hover:text-indigo-600 dark:hover:text-white'
     }`}
   >
     <span className="text-lg">{icon}</span>
@@ -92,14 +92,14 @@ const StatCard = ({ label, value, icon, color, sub }) => {
     blue: 'from-blue-500 to-cyan-600 shadow-blue-500/30',
   };
   return (
-    <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 flex items-center gap-4 hover:border-slate-600 transition-colors">
+    <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 rounded-2xl p-6 flex items-center gap-4 hover:border-indigo-500/30 transition-colors shadow-sm">
       <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${colors[color]} shadow-lg flex items-center justify-center text-white text-2xl flex-shrink-0`}>
         {icon}
       </div>
       <div>
-        <p className="text-3xl font-black text-white">{typeof value === 'number' ? value.toLocaleString() : value}</p>
-        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-0.5">{label}</p>
-        {sub && <p className="text-emerald-400 text-xs font-semibold mt-1">{sub}</p>}
+        <p className="text-3xl font-black text-gray-900 dark:text-white">{typeof value === 'number' ? value.toLocaleString() : value}</p>
+        <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest mt-0.5">{label}</p>
+        {sub && <p className="text-emerald-500 dark:text-emerald-400 text-xs font-semibold mt-1">{sub}</p>}
       </div>
     </div>
   );
@@ -123,8 +123,10 @@ const AdminDashboard = () => {
   const [events, setEvents] = useState([]);
   const initialEventForm = { title: '', description: '', type: 'Hackathon', startDate: '', deadline: '', location: '', link: '', skills: '', featured: '', jobTitle: '', jobType: 'Full-Time', applicantNeed: 'Both', salary: '' };
   const [eventForm, setEventForm] = useState(initialEventForm);
+  const [eventModal, setEventModal] = useState(null); // Fixed: Missing state declaration
 
     const [sentNotifs, setSentNotifs] = useState([]);
+    const [notifForm, setNotifForm] = useState({ title: '', message: '', type: 'global', department: '', year: '', priority: 'general' });
     
     // Feedback Management state
     const [allFeedback, setAllFeedback] = useState([]);
@@ -134,7 +136,8 @@ const AdminDashboard = () => {
     const fetchFeedback = async () => {
         setIsLoadingFeedback(true);
         try {
-            const token = localStorage.getItem('token') || '';
+            // Unify Auth: Send user object as "token"
+            const token = encodeURIComponent(JSON.stringify(user));
             const response = await fetch('http://localhost:5000/api/feedback/admin/all', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -149,12 +152,6 @@ const AdminDashboard = () => {
         }
     };
 
-  // Auth guard
-  useEffect(() => {
-    if (!user) { navigate('/login'); return; }
-    if (user.role !== 'admin') { navigate('/gpa-prediction'); return; }
-  }, [user, navigate]);
-
   useEffect(() => {
     setUsers(getAllUsers ? getAllUsers() : []);
     setEvents(loadEvents());
@@ -164,19 +161,8 @@ const AdminDashboard = () => {
     }
   }, [tab]);
 
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <FiShield className="text-red-500 text-7xl mx-auto" />
-          <h1 className="text-4xl font-black text-white">403 — Admin Only</h1>
-          <Link to="/gpa-prediction" className="inline-block mt-4 bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-500 transition-colors">
-            Go to User Services
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // Main layout render follows...
+
 
   // ─── Overview Data ──────────────────────────────────────────────────────────
   const loginLog = getLoginLog();
@@ -271,25 +257,25 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex transition-colors duration-500">
 
       {/* ── Admin Sidebar ── */}
-      <aside className="w-64 flex-shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col min-h-[calc(100vh-80px)]">
-        <div className="p-6 border-b border-slate-800">
+      <aside className="w-64 flex-shrink-0 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 flex flex-col min-h-[calc(100vh-80px)] transition-colors">
+        <div className="p-6 border-b border-gray-100 dark:border-slate-800">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center">
               <FiShield className="text-white text-lg" />
             </div>
             <div>
-              <p className="text-white font-black text-sm">Control Panel</p>
-              <p className="text-indigo-400 text-xs font-semibold">Administrator</p>
+              <p className="text-gray-900 dark:text-white font-black text-sm">Control Panel</p>
+              <p className="text-indigo-600 dark:text-indigo-400 text-xs font-semibold">Administrator</p>
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-3 p-3 bg-slate-800 rounded-xl">
+          <div className="mt-4 flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-xl">
             <img src={user.profile_picture} alt="admin" className="w-8 h-8 rounded-lg object-cover" />
             <div>
-              <p className="text-white text-xs font-bold leading-none">{user.name}</p>
-              <p className="text-slate-400 text-xs mt-0.5">@{user.username}</p>
+              <p className="text-gray-900 dark:text-white text-xs font-bold leading-none">{user.name}</p>
+              <p className="text-gray-500 dark:text-slate-400 text-xs mt-0.5">@{user.username}</p>
             </div>
           </div>
         </div>
@@ -301,8 +287,8 @@ const AdminDashboard = () => {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-slate-800">
-          <Link to="/gpa-prediction" className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/60 hover:text-white font-semibold text-sm transition-all">
+        <div className="p-4 border-t border-gray-100 dark:border-slate-800">
+          <Link to="/gpa-prediction" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700/60 hover:text-indigo-600 dark:hover:text-white font-semibold text-sm transition-all">
             <FiGrid /> User Services
           </Link>
           <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 font-semibold text-sm transition-all mt-1">
@@ -315,7 +301,7 @@ const AdminDashboard = () => {
       <main className="flex-1 overflow-auto">
       
         {/* Welcome Header Card */}
-        <div className="bg-gradient-to-r from-indigo-900 to-slate-900 border-b border-indigo-500/20 px-8 py-10 relative overflow-hidden">
+        <div className="bg-gradient-to-r from-indigo-900 to-slate-900 dark:from-indigo-950 dark:to-slate-900 border-b border-indigo-500/20 px-8 py-10 relative overflow-hidden transition-colors">
            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-32 -mt-32" />
            <div className="relative z-10 flex justify-between items-center">
                <div>
@@ -323,17 +309,17 @@ const AdminDashboard = () => {
                    <p className="text-indigo-200 mt-2">Here is what is happening with the Bilih platform today.</p>
                </div>
                <div className="text-right hidden md:block">
-                   <p className="text-sm font-bold text-slate-300">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                   <p className="text-sm font-bold text-indigo-200/60">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
                </div>
            </div>
         </div>
 
         {/* ════════ OVERVIEW ════════ */}
         {tab === 'overview' && (
-          <div className="p-8 space-y-8">
+          <div className="p-8 space-y-8 animate-fade-in">
             <div>
-              <h1 className="text-3xl font-black text-white">Platform <span className="text-indigo-400">Overview</span></h1>
-              <p className="text-slate-400 mt-1">Real-time platform health and engagement metrics.</p>
+              <h1 className="text-3xl font-black text-gray-900 dark:text-white">Platform <span className="text-indigo-600 dark:text-indigo-400">Overview</span></h1>
+              <p className="text-gray-500 dark:text-slate-400 mt-1">Real-time platform health and engagement metrics.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -344,8 +330,8 @@ const AdminDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
-                <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2"><FiBarChart2 className="text-indigo-400" /> Daily Logins (Last 7 Days)</h3>
+              <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-gray-900 dark:text-white font-bold text-lg mb-4 flex items-center gap-2"><FiBarChart2 className="text-indigo-600 dark:text-indigo-400" /> Daily Logins (Last 7 Days)</h3>
                 <ResponsiveContainer width="100%" height={220}>
                   <LineChart data={last7Days.map(d => ({ ...d, logins: d.logins + Math.floor(Math.random() * 40 + 10) }))}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
@@ -357,8 +343,8 @@ const AdminDashboard = () => {
                 </ResponsiveContainer>
               </div>
 
-              <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
-                <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2"><FiTrendingUp className="text-emerald-400" /> Most Popular Features</h3>
+              <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-gray-900 dark:text-white font-bold text-lg mb-4 flex items-center gap-2"><FiTrendingUp className="text-emerald-600 dark:text-emerald-400" /> Most Popular Features</h3>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={FEATURE_POPULARITY}>
                     <XAxis dataKey="feature" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
@@ -370,8 +356,8 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
-              <h3 className="text-white font-bold text-lg mb-4">Platform Health</h3>
+            <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 rounded-2xl p-6 shadow-sm">
+              <h3 className="text-gray-900 dark:text-white font-bold text-lg mb-4">Platform Health</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: 'Server Uptime', value: '99.9%', ok: true },
@@ -503,11 +489,11 @@ const AdminDashboard = () => {
 
         {/* ════════ EVENT MANAGEMENT ════════ */}
         {tab === 'events' && (
-          <div className="p-8 space-y-6">
+          <div className="p-8 space-y-6 animate-fade-in">
             <div className="flex justify-between items-start">
               <div>
-                <h1 className="text-3xl font-black text-white">Event <span className="text-indigo-400">Management</span></h1>
-                <p className="text-slate-400 mt-1">Create, edit, delete and feature events & hackathons.</p>
+                <h1 className="text-3xl font-black text-gray-900 dark:text-white">Event <span className="text-indigo-600 dark:text-indigo-400">Management</span></h1>
+                <p className="text-gray-500 dark:text-slate-400 mt-1">Create, edit, delete and feature events & hackathons.</p>
               </div>
               <button onClick={openAddEvent} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/30">
                 <FiPlus /> Add Event
@@ -516,11 +502,11 @@ const AdminDashboard = () => {
 
             <div className="space-y-4">
               {events.map(ev => (
-                <div key={ev.id} className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 hover:border-slate-600 transition-colors">
+                <div key={ev.id} className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 rounded-2xl p-6 hover:border-indigo-500/30 transition-colors shadow-sm">
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 flex-wrap mb-2">
-                        <h3 className="text-white font-bold text-lg">{ev.title}</h3>
+                        <h3 className="text-gray-900 dark:text-white font-bold text-lg">{ev.title}</h3>
                         <span className={`px-2 py-0.5 rounded-lg text-xs font-bold ${ev.type === 'Hackathon' ? 'bg-violet-500/20 text-violet-400' : ev.type === 'Workshop' ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
                           {ev.type}
                         </span>
@@ -530,15 +516,15 @@ const AdminDashboard = () => {
                           </span>
                         )}
                       </div>
-                      <p className="text-slate-400 text-sm mb-3">{ev.description}</p>
-                      <div className="flex flex-wrap gap-4 text-xs text-slate-500">
+                      <p className="text-gray-500 dark:text-slate-400 text-sm mb-3">{ev.description}</p>
+                      <div className="flex flex-wrap gap-4 text-xs text-gray-400 dark:text-slate-500">
                         <span className="flex items-center gap-1"><FiCalendar /> Start: {ev.startDate || '—'}</span>
                         <span className="flex items-center gap-1"><FiAlertCircle /> Deadline: {ev.deadline}</span>
                         {ev.location && <span className="flex items-center gap-1"><FiMapPin /> {ev.location}</span>}
                         {ev.link && <span className="flex items-center gap-1"><FiLink /> Online</span>}
                         {ev.skills && <span className="flex items-center gap-1">🛠 {ev.skills}</span>}
                       </div>
-                      <div className="flex gap-4 mt-3 text-xs text-slate-500">
+                      <div className="flex gap-4 mt-3 text-xs text-gray-400 dark:text-slate-500">
                         <span>👍 {ev.likes || 0}</span>
                         <span>👎 {ev.dislikes || 0}</span>
                         <span>💬 {ev.comments || 0} comments</span>
@@ -548,10 +534,10 @@ const AdminDashboard = () => {
                       <button onClick={() => handleFeature(ev.id, 'Trending')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${ev.featured === 'Trending' ? 'bg-amber-500 text-white' : 'bg-slate-700 text-slate-400 hover:bg-amber-500/20 hover:text-amber-400'}`}>
                         🔥 Trending
                       </button>
-                      <button onClick={() => handleFeature(ev.id, 'Recommended')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${ev.featured === 'Recommended' ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400 hover:bg-indigo-500/20 hover:text-indigo-400'}`}>
+                      <button onClick={() => handleFeature(ev.id, 'Recommended')} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${ev.featured === 'Recommended' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white'}`}>
                         ⭐ Recommended
                       </button>
-                      <button onClick={() => openEditEvent(ev)} className="p-2 bg-slate-700 text-slate-300 hover:text-white hover:bg-slate-600 rounded-lg transition-all">
+                      <button onClick={() => openEditEvent(ev)} className="p-2 bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white rounded-lg transition-all">
                         <FiEdit2 />
                       </button>
                       <button onClick={() => handleDeleteEvent(ev.id)} className="p-2 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg transition-all">
@@ -590,31 +576,31 @@ const AdminDashboard = () => {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-slate-800 border border-emerald-500/20 rounded-2xl p-6 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-xl">
+              <div className="bg-white dark:bg-slate-800 border border-emerald-500/10 dark:border-emerald-500/20 rounded-2xl p-6 flex items-center gap-4 shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 flex items-center justify-center text-xl">
                   <FiThumbsUp />
                 </div>
                 <div>
-                   <p className="text-2xl font-black text-white">{allFeedback.filter(f => f.type === 'like').length}</p>
-                   <p className="text-slate-500 text-xs font-bold uppercase">Total Likes</p>
+                   <p className="text-2xl font-black text-gray-900 dark:text-white">{allFeedback.filter(f => f.type === 'like').length}</p>
+                   <p className="text-gray-500 dark:text-slate-500 text-xs font-bold uppercase">Total Likes</p>
                 </div>
               </div>
-              <div className="bg-slate-800 border border-red-500/20 rounded-2xl p-6 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center text-xl">
+              <div className="bg-white dark:bg-slate-800 border border-red-500/10 dark:border-red-500/20 rounded-2xl p-6 flex items-center gap-4 shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-red-500/10 text-red-600 dark:text-red-500 flex items-center justify-center text-xl">
                   <FiThumbsDown />
                 </div>
                 <div>
-                   <p className="text-2xl font-black text-white">{allFeedback.filter(f => f.type === 'dislike').length}</p>
-                   <p className="text-slate-500 text-xs font-bold uppercase">Total Dislikes</p>
+                   <p className="text-2xl font-black text-gray-900 dark:text-white">{allFeedback.filter(f => f.type === 'dislike').length}</p>
+                   <p className="text-gray-500 dark:text-slate-500 text-xs font-bold uppercase">Total Dislikes</p>
                 </div>
               </div>
-              <div className="bg-slate-800 border border-blue-500/20 rounded-2xl p-6 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl">
+              <div className="bg-white dark:bg-slate-800 border border-blue-500/10 dark:border-blue-500/20 rounded-2xl p-6 flex items-center gap-4 shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-500 flex items-center justify-center text-xl">
                   <FiMessageSquare />
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-white">{allFeedback.filter(f => f.comment).length}</p>
-                  <p className="text-slate-500 text-xs font-bold uppercase">Total Comments</p>
+                  <p className="text-2xl font-black text-gray-900 dark:text-white">{allFeedback.filter(f => f.comment).length}</p>
+                  <p className="text-gray-500 dark:text-slate-500 text-xs font-bold uppercase">Total Comments</p>
                 </div>
               </div>
             </div>
@@ -694,21 +680,21 @@ const AdminDashboard = () => {
 
         {/* ════════ NOTIFICATIONS ════════ */}
         {tab === 'notifications' && (
-          <div className="p-8 space-y-6">
+          <div className="p-8 space-y-6 animate-fade-in">
             <div>
-              <h1 className="text-3xl font-black text-white">Notification <span className="text-indigo-400">Management</span></h1>
-              <p className="text-slate-400 mt-1">Send global announcements or target specific groups.</p>
+              <h1 className="text-3xl font-black text-gray-900 dark:text-white">Notification <span className="text-indigo-600 dark:text-indigo-400">Management</span></h1>
+              <p className="text-gray-500 dark:text-slate-400 mt-1">Send global announcements or target specific groups.</p>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               {/* Send Form */}
-              <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 space-y-4">
-                <h3 className="text-white font-bold text-lg flex items-center gap-2"><FiSend className="text-indigo-400" /> Compose Notification</h3>
+              <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 rounded-2xl p-6 space-y-4 shadow-sm">
+                <h3 className="text-gray-900 dark:text-white font-bold text-lg flex items-center gap-2"><FiSend className="text-indigo-600 dark:text-indigo-400" /> Compose Notification</h3>
 
                 {/* Type */}
                 <div className="flex gap-3">
                   {[['global', '🌍 Global'], ['targeted', '🎯 Targeted']].map(([val, label]) => (
-                    <button key={val} onClick={() => setNotifForm(f => ({ ...f, type: val }))} className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${notifForm.type === val ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}>
+                    <button key={val} onClick={() => setNotifForm(f => ({ ...f, type: val }))} className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${notifForm.type === val ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white'}`}>
                       {label}
                     </button>
                   ))}
@@ -717,11 +703,11 @@ const AdminDashboard = () => {
                 {/* Targeted filters */}
                 {notifForm.type === 'targeted' && (
                   <div className="grid grid-cols-2 gap-3">
-                    <select value={notifForm.department} onChange={e => setNotifForm(f => ({ ...f, department: e.target.value }))} className="bg-slate-700 border border-slate-600 text-white text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500">
+                    <select value={notifForm.department} onChange={e => setNotifForm(f => ({ ...f, department: e.target.value }))} className="bg-gray-100 dark:bg-slate-700 border border-gray-100 dark:border-slate-600 text-gray-900 dark:text-white text-sm px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
                       <option value="">All Departments</option>
                       {DEPTS.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
-                    <select value={notifForm.year} onChange={e => setNotifForm(f => ({ ...f, year: e.target.value }))} className="bg-slate-700 border border-slate-600 text-white text-sm px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500">
+                    <select value={notifForm.year} onChange={e => setNotifForm(f => ({ ...f, year: e.target.value }))} className="bg-gray-100 dark:bg-slate-700 border border-gray-100 dark:border-slate-600 text-gray-900 dark:text-white text-sm px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all">
                       <option value="">All Years</option>
                       {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
                     </select>
@@ -731,14 +717,14 @@ const AdminDashboard = () => {
                 {/* Priority */}
                 <div className="flex gap-2">
                   {[['urgent', '🔴 Urgent'], ['recommended', '🟡 Recommended'], ['general', '🟢 General']].map(([val, label]) => (
-                    <button key={val} onClick={() => setNotifForm(f => ({ ...f, priority: val }))} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border ${notifForm.priority === val ? priorityColors[val] : 'bg-slate-700 border-slate-600 text-slate-400 hover:border-slate-500'}`}>
+                    <button key={val} onClick={() => setNotifForm(f => ({ ...f, priority: val }))} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border ${notifForm.priority === val ? priorityColors[val] : 'bg-gray-100 dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-400 dark:text-slate-400 hover:border-indigo-500/20'}`}>
                       {label}
                     </button>
                   ))}
                 </div>
 
-                <input value={notifForm.title} onChange={e => setNotifForm(f => ({ ...f, title: e.target.value }))} placeholder="Notification title..." className="w-full bg-slate-700 border border-slate-600 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm transition-colors" />
-                <textarea value={notifForm.message} onChange={e => setNotifForm(f => ({ ...f, message: e.target.value }))} placeholder="Write your message..." rows={4} className="w-full bg-slate-700 border border-slate-600 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm resize-none transition-colors" />
+                <input value={notifForm.title} onChange={e => setNotifForm(f => ({ ...f, title: e.target.value }))} placeholder="Notification title..." className="w-full bg-gray-100 dark:bg-slate-700 border border-gray-100 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all shadow-sm" />
+                <textarea value={notifForm.message} onChange={e => setNotifForm(f => ({ ...f, message: e.target.value }))} placeholder="Write your message..." rows={4} className="w-full bg-gray-100 dark:bg-slate-700 border border-gray-100 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm resize-none transition-all shadow-sm" />
 
                 <button onClick={handleSendNotif} className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/30">
                   <FiSend /> Send Notification
@@ -746,8 +732,8 @@ const AdminDashboard = () => {
               </div>
 
               {/* Sent History */}
-              <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6 space-y-4">
-                <h3 className="text-white font-bold text-lg flex items-center gap-2"><FiBell className="text-indigo-400" /> Sent Notifications ({sentNotifs.length})</h3>
+              <div className="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 rounded-2xl p-6 space-y-4 shadow-sm">
+                <h3 className="text-gray-900 dark:text-white font-bold text-lg flex items-center gap-2"><FiBell className="text-indigo-600 dark:text-indigo-400" /> Sent Notifications ({sentNotifs.length})</h3>
                 {sentNotifs.length === 0 ? (
                   <div className="text-center py-12">
                     <FiBell className="text-4xl text-slate-600 mx-auto mb-3" />
@@ -780,15 +766,15 @@ const AdminDashboard = () => {
       {/* Reset Password Modal */}
       {resetModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-8 w-full max-w-md space-y-5">
+          <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-8 w-full max-w-md space-y-5 shadow-2xl">
             <div>
-              <h3 className="text-white font-black text-xl">Reset Password</h3>
-              <p className="text-slate-400 text-sm mt-1">Set new password for <span className="text-indigo-400 font-bold">{resetModal.name}</span></p>
+              <h3 className="text-gray-900 dark:text-white font-black text-xl">Reset Password</h3>
+              <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">Set new password for <span className="text-indigo-600 dark:text-indigo-400 font-bold">{resetModal.name}</span></p>
             </div>
-            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password (min 4 chars)" className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm" />
+            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password (min 4 chars)" className="w-full bg-gray-100 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all" />
             <div className="flex gap-3">
-              <button onClick={() => { setResetModal(null); setNewPassword(''); }} className="flex-1 py-3 bg-slate-700 text-slate-300 hover:bg-slate-600 rounded-xl font-bold text-sm transition-colors"><FiX className="inline mr-2" />Cancel</button>
-              <button onClick={handleReset} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-indigo-600/30"><FiCheck className="inline mr-2" />Reset</button>
+              <button onClick={() => { setResetModal(null); setNewPassword(''); }} className="flex-1 py-3 bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-xl font-bold text-sm transition-colors text-center flex items-center justify-center gap-2"><FiX /> Cancel</button>
+              <button onClick={handleReset} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2"><FiCheck /> Reset</button>
             </div>
           </div>
         </div>
@@ -797,15 +783,15 @@ const AdminDashboard = () => {
       {/* Delete Confirm Modal */}
       {deleteModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-red-500/30 rounded-2xl p-8 w-full max-w-md space-y-5">
+          <div className="bg-white dark:bg-slate-900 border border-red-500/10 dark:border-red-500/30 rounded-2xl p-8 w-full max-w-md space-y-5 shadow-2xl">
             <div className="text-center">
               <FiTrash2 className="text-red-500 text-4xl mx-auto mb-3" />
-              <h3 className="text-white font-black text-xl">Delete User?</h3>
-              <p className="text-slate-400 text-sm mt-2">This will permanently remove <span className="text-red-400 font-bold">{deleteModal.name}</span> from the platform. This action cannot be undone.</p>
+              <h3 className="text-gray-900 dark:text-white font-black text-xl">Delete User?</h3>
+              <p className="text-gray-500 dark:text-slate-400 text-sm mt-2">This will permanently remove <span className="text-red-600 dark:text-red-400 font-bold">{deleteModal.name}</span> from the platform. This action cannot be undone.</p>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteModal(null)} className="flex-1 py-3 bg-slate-700 text-slate-300 hover:bg-slate-600 rounded-xl font-bold text-sm transition-colors"><FiX className="inline mr-2" />Cancel</button>
-              <button onClick={confirmDelete} className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-sm transition-colors"><FiTrash2 className="inline mr-2" />Delete</button>
+              <button onClick={() => setDeleteModal(null)} className="flex-1 py-3 bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2"><FiX /> Cancel</button>
+              <button onClick={confirmDelete} className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-red-600/20"><FiTrash2 /> Delete</button>
             </div>
           </div>
         </div>
@@ -814,44 +800,44 @@ const AdminDashboard = () => {
       {/* Add/Edit Event Modal */}
       {eventModal !== null && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-8 w-full max-w-lg space-y-5 my-8">
-            <h3 className="text-white font-black text-xl">{eventModal === 'add' ? '➕ Add New Event' : '✏️ Edit Event'}</h3>
-            <input value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} placeholder="Event Title *" className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm" />
-            <textarea value={eventForm.description} onChange={e => setEventForm(f => ({ ...f, description: e.target.value }))} placeholder="Description" rows={3} className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm resize-none" />
-            <select value={eventForm.type} onChange={e => setEventForm(f => ({ ...f, type: e.target.value }))} className="w-full bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm">
+          <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-2xl p-8 w-full max-w-lg space-y-5 my-8 shadow-2xl">
+            <h3 className="text-gray-900 dark:text-white font-black text-xl">{eventModal === 'add' ? '➕ Add New Event' : '✏️ Edit Event'}</h3>
+            <input value={eventForm.title} onChange={e => setEventForm(f => ({ ...f, title: e.target.value }))} placeholder="Event Title *" className="w-full bg-gray-100 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all" />
+            <textarea value={eventForm.description} onChange={e => setEventForm(f => ({ ...f, description: e.target.value }))} placeholder="Description" rows={3} className="w-full bg-gray-100 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm resize-none transition-all" />
+            <select value={eventForm.type} onChange={e => setEventForm(f => ({ ...f, type: e.target.value }))} className="w-full bg-gray-100 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all">
               <option>Job</option><option>Internship</option><option>Scholarship</option><option>Hackathon</option><option>Workshop</option><option>Club</option>
             </select>
             {['Job', 'Internship', 'Scholarship'].includes(eventForm.type) && (
-                <div className="space-y-3 p-4 bg-slate-800 rounded-xl border border-indigo-500/30">
-                    <p className="text-xs font-black text-indigo-400 uppercase tracking-widest">Opportunity Details</p>
-                    <input value={eventForm.jobTitle} onChange={e => setEventForm(f => ({ ...f, jobTitle: e.target.value }))} placeholder="Job/Role Title" className="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm" />
+                <div className="space-y-3 p-4 bg-gray-50 dark:bg-slate-800 rounded-xl border border-indigo-500/10 dark:border-indigo-500/30">
+                    <p className="text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Opportunity Details</p>
+                    <input value={eventForm.jobTitle} onChange={e => setEventForm(f => ({ ...f, jobTitle: e.target.value }))} placeholder="Job/Role Title" className="w-full bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all" />
                     <div className="grid grid-cols-2 gap-3">
-                        <select value={eventForm.jobType} onChange={e => setEventForm(f => ({ ...f, jobType: e.target.value }))} className="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm">
+                        <select value={eventForm.jobType} onChange={e => setEventForm(f => ({ ...f, jobType: e.target.value }))} className="w-full bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all">
                             <option>Full-Time</option><option>Part-Time</option><option>Remote</option><option>Contract</option><option>One-Time</option>
                         </select>
-                        <select value={eventForm.applicantNeed} onChange={e => setEventForm(f => ({ ...f, applicantNeed: e.target.value }))} className="w-full bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm">
+                        <select value={eventForm.applicantNeed} onChange={e => setEventForm(f => ({ ...f, applicantNeed: e.target.value }))} className="w-full bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all">
                             <option>Both</option><option>Male</option><option>Female</option>
                         </select>
                     </div>
-                    <input value={eventForm.salary} onChange={e => setEventForm(f => ({ ...f, salary: e.target.value }))} placeholder="Salary/Prize (e.g. $50,000/yr)" className="w-full bg-slate-900 border border-slate-700 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm" />
+                    <input value={eventForm.salary} onChange={e => setEventForm(f => ({ ...f, salary: e.target.value }))} placeholder="Salary/Prize (e.g. $50,000/yr)" className="w-full bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all" />
                 </div>
             )}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 block">Start Date</label>
-                <input type="date" value={eventForm.startDate} onChange={e => setEventForm(f => ({ ...f, startDate: e.target.value }))} className="w-full bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm" />
+                <label className="text-gray-400 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1 block px-2">Start Date</label>
+                <input type="date" value={eventForm.startDate} onChange={e => setEventForm(f => ({ ...f, startDate: e.target.value }))} className="w-full bg-gray-100 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all" />
               </div>
               <div>
-                <label className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 block">Deadline *</label>
-                <input type="date" value={eventForm.deadline} onChange={e => setEventForm(f => ({ ...f, deadline: e.target.value }))} className="w-full bg-slate-800 border border-slate-700 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm" />
+                <label className="text-gray-400 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1 block px-2">Deadline *</label>
+                <input type="date" value={eventForm.deadline} onChange={e => setEventForm(f => ({ ...f, deadline: e.target.value }))} className="w-full bg-gray-100 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all" />
               </div>
             </div>
-            <input value={eventForm.location} onChange={e => setEventForm(f => ({ ...f, location: e.target.value }))} placeholder="Location (leave blank if online)" className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm" />
-            <input value={eventForm.link} onChange={e => setEventForm(f => ({ ...f, link: e.target.value }))} placeholder="Online Link (optional)" className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm" />
-            <input value={eventForm.skills} onChange={e => setEventForm(f => ({ ...f, skills: e.target.value }))} placeholder="Required Skills (e.g. Python, React)" className="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:border-indigo-500 text-sm" />
+            <input value={eventForm.location} onChange={e => setEventForm(f => ({ ...f, location: e.target.value }))} placeholder="Location (leave blank if online)" className="w-full bg-gray-100 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all" />
+            <input value={eventForm.link} onChange={e => setEventForm(f => ({ ...f, link: e.target.value }))} placeholder="Online Link (optional)" className="w-full bg-gray-100 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all" />
+            <input value={eventForm.skills} onChange={e => setEventForm(f => ({ ...f, skills: e.target.value }))} placeholder="Required Skills (e.g. Python, React)" className="w-full bg-gray-100 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all" />
             <div className="flex gap-3">
-              <button onClick={() => setEventModal(null)} className="flex-1 py-3 bg-slate-700 text-slate-300 hover:bg-slate-600 rounded-xl font-bold text-sm transition-colors">Cancel</button>
-              <button onClick={handleEventSave} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-indigo-600/30">
+              <button onClick={() => setEventModal(null)} className="flex-1 py-3 bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">Cancel</button>
+              <button onClick={handleEventSave} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/30">
                 {eventModal === 'add' ? 'Create Event' : 'Save Changes'}
               </button>
             </div>

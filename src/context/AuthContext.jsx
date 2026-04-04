@@ -13,7 +13,7 @@ const ADMIN_USER = {
     id: 0,
     name: 'Admin Bilih',
     username: 'Bilih',
-    password: 'twinspark',
+    password: '@twinspark1',
     role: 'admin',
     email: 'admin@bilih.edu.et',
     department: 'Administration',

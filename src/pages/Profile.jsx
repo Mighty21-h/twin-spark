@@ -64,7 +64,8 @@ const Profile = () => {
         reader.onloadend = async () => {
             const base64String = reader.result;
             try {
-                const token = localStorage.getItem('token') || '';
+                // Unify Auth: Send user object as "token"
+                const token = encodeURIComponent(JSON.stringify(user));
                 const response = await fetch('http://localhost:5000/api/feedback/update-photo', {
                     method: 'POST',
                     headers: {

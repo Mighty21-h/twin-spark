@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { FiPlay, FiCheck, FiZap, FiBookOpen, FiStar, FiSettings, FiBriefcase, FiVolume2, FiMessageCircle, FiArrowRight, FiArrowLeft, FiHash } from 'react-icons/fi';
+import { FiPlay, FiCheck, FiZap, FiBookOpen, FiVolume2, FiMessageCircle, FiArrowRight, FiArrowLeft } from 'react-icons/fi';
 import { NUMBERS_DATA } from '../data/numbers';
+import { categorizedPhrases } from '../data/languagePhrases';
 import FeedbackSection from '../components/FeedbackSection';
 
 const TRANSLATIONS = {
@@ -33,6 +34,7 @@ const LanguageLearning = () => {
     const [streak] = useState(7);
     const [progress] = useState(65);
     const [numberPage, setNumberPage] = useState(0); // 0: 1-20, 1: 21-30, 2: 31-40...
+    const [phrasePage, setPhrasePage] = useState(0); // 0: 1-10, 1: 11-20...
 
     const languages = [
         { id: 'amharic', name: 'አማርኛ (Amharic)', flag: '🇪🇹', level: 'Intermediate', color: 'blue' },
@@ -43,8 +45,8 @@ const LanguageLearning = () => {
     const lessons = [
         { title: 'Basic Greetings', completed: true, duration: '10 min', clickable: true },
         { title: 'Numbers 1-100', completed: true, duration: '15 min', clickable: true },
-        { title: 'Daily Phrases', completed: false, duration: '12 min', clickable: false },
-        { title: 'Food & Shopping', completed: false, duration: '20 min', clickable: false }
+        { title: 'Daily Phrases', completed: false, duration: '12 min', clickable: true },
+        { title: 'Food & Shopping', completed: false, duration: '20 min', clickable: true }
     ];
 
     return (
@@ -83,7 +85,7 @@ const LanguageLearning = () => {
                                 {languages.map((lang) => (
                                     <button
                                         key={lang.id}
-                                        onClick={() => { setSelectedLanguage(lang.id); setActiveLesson(null); }}
+                                        onClick={() => { setSelectedLanguage(lang.id); setActiveLesson(null); setPhrasePage(0); }}
                                         className={`p-6 rounded-3xl border-2 transition-all flex items-center gap-6 group ${
                                             selectedLanguage === lang.id
                                                 ? 'bg-white dark:bg-gray-800 border-emerald-500 shadow-xl shadow-emerald-500/20'
@@ -127,12 +129,37 @@ const LanguageLearning = () => {
                         {/* Interactive View Column */}
                         <div className="xl:col-span-7">
                             {!activeLesson ? (
-                                <div className="h-full flex flex-col items-center justify-center text-center p-12 glass-card rounded-[2.5rem] border-dashed border-2 border-gray-200 dark:border-gray-800 relative overflow-hidden group">
-                                    <div className="w-24 h-24 rounded-full bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/50 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                        <FiMessageCircle className="text-4xl text-emerald-500" />
+                                <div className="space-y-8 animate-fade-in">
+                                    <div className="glass-card rounded-[2.5rem] p-8 md:p-12 border-dashed border-2 border-gray-200 dark:border-gray-800 text-center relative overflow-hidden group">
+                                        <div className="w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                                            <FiBookOpen className="text-4xl text-emerald-500" />
+                                        </div>
+                                        <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3">Your Learning Journey</h3>
+                                        <p className="text-gray-500 font-medium max-w-sm mx-auto mb-10">Select a course below or from the sidebar to continue mastering {languages.find(l=>l.id===selectedLanguage)?.name}.</p>
+                                        
+                                        {/* Premium Lesson Cards Grid */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                                            {lessons.map((lesson, idx) => (
+                                                <button 
+                                                    key={idx}
+                                                    onClick={() => { setActiveLesson(lesson.title); setPhrasePage(0); }}
+                                                    className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 flex items-center gap-6 hover:scale-[1.03] active:scale-95 transition-all group"
+                                                >
+                                                    <div className="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-2xl text-gray-400 group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-inner">
+                                                        <FiPlay className="ml-1" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-lg font-black text-gray-900 dark:text-white group-hover:text-emerald-500 transition-colors">
+                                                            {lesson.title}
+                                                        </h4>
+                                                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mt-1">
+                                                            {lesson.duration}
+                                                        </p>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                    <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3">Begin Learning</h3>
-                                    <p className="text-gray-500 font-medium max-w-sm">Select a language on the left and click "Basic Greetings" to start your immersive translation session.</p>
                                 </div>
                             ) : (
                                 <div className="space-y-6 animate-fade-in relative">
@@ -168,6 +195,58 @@ const LanguageLearning = () => {
                                                     </div>
                                                 </div>
                                             ))
+                                        ) : (activeLesson === 'Daily Phrases' || activeLesson === 'Food & Shopping') ? (
+                                            <div className="space-y-6">
+                                                <div className="space-y-4">
+                                                    {Object.entries(categorizedPhrases[activeLesson.toLowerCase()]?.[selectedLanguage === 'oromo' ? 'English' : (selectedLanguage === 'amharic' ? 'Amharic' : 'English')] || {})
+                                                        .slice(phrasePage * 10, (phrasePage + 1) * 10)
+                                                        .map(([eng, trg], idx) => (
+                                                            <div key={idx} className="glass-card rounded-[2rem] p-6 border border-gray-200 dark:border-gray-800 hover:border-emerald-500/50 transition-colors group flex items-center justify-between">
+                                                                <div className="flex items-center gap-6">
+                                                                    <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 font-black text-xl flex items-center justify-center border border-gray-200 dark:border-gray-700">
+                                                                        {phrasePage * 10 + idx + 1}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-xs uppercase tracking-widest font-black text-emerald-500 mb-1">{selectedLanguage === 'oromo' ? 'English' : (selectedLanguage === 'amharic' ? 'Amharic' : 'English')}</p>
+                                                                        <p className="text-lg font-black text-gray-900 dark:text-white capitalize">{eng}</p>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <FiArrowRight className="text-gray-300 dark:text-gray-700 text-2xl hidden md:block" />
+            
+                                                                <div className="text-right">
+                                                                    <p className="text-xs uppercase tracking-widest font-black text-gray-400 mb-1">
+                                                                        {selectedLanguage === 'oromo' ? 'Afaan Oromo' : 'Translation'}
+                                                                    </p>
+                                                                    <p className="text-xl font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2 rounded-xl inline-block border border-emerald-100 dark:border-emerald-800/30">
+                                                                        {trg}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                </div>
+
+                                                {/* Pagination for Phrases */}
+                                                <div className="flex items-center justify-between pt-6 border-t border-gray-100 dark:border-gray-800">
+                                                    <button 
+                                                        onClick={() => setPhrasePage(p => Math.max(0, p - 1))}
+                                                        disabled={phrasePage === 0}
+                                                        className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black transition-all ${phrasePage === 0 ? 'opacity-30 cursor-not-allowed grayscale' : 'bg-white dark:bg-gray-800 hover:scale-105 active:scale-95 shadow-md border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-white'}`}
+                                                    >
+                                                        <FiArrowLeft /> Previous
+                                                    </button>
+                                                    <div className="text-gray-400 font-black uppercase text-[10px] tracking-[0.2em]">
+                                                        Page {phrasePage + 1}
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => setPhrasePage(p => p + 1)}
+                                                        disabled={(phrasePage + 1) * 10 >= Object.keys(categorizedPhrases[activeLesson.toLowerCase()]?.[selectedLanguage === 'oromo' ? 'English' : (selectedLanguage === 'amharic' ? 'Amharic' : 'English')] || {}).length}
+                                                        className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black transition-all ${(phrasePage + 1) * 10 >= Object.keys(categorizedPhrases[activeLesson.toLowerCase()]?.[selectedLanguage === 'oromo' ? 'English' : (selectedLanguage === 'amharic' ? 'Amharic' : 'English')] || {}).length ? 'opacity-30 cursor-not-allowed grayscale' : 'bg-emerald-500 text-white hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/30'}`}
+                                                    >
+                                                        Next <FiArrowRight />
+                                                    </button>
+                                                </div>
+                                            </div>
                                         ) : (
                                             <div className="space-y-6">
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
