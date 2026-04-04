@@ -58,7 +58,6 @@ const Navbar = () => {
     const navLinks = [
         { label: 'Language Learning', to: '/language', icon: <FiGlobe /> },
         { label: 'AI Language Tutor', to: '/language-tutor', icon: <FiCpu className="text-indigo-500" /> },
-        { label: 'AI Assistant', to: '/assistant', icon: <FiMessageSquare className="text-purple-500" /> },
         { label: 'GPA Prediction', to: '/gpa-prediction', icon: <FiTrendingUp /> },
         { label: 'Study Planner', to: '/study-planner', icon: <FiBookOpen /> },
         { label: 'Opportunities', to: '/opportunities', icon: <FiSearch /> },

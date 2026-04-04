@@ -19,7 +19,6 @@ import Notifications from './pages/Notifications';
 import StudyPlanner from './pages/StudyPlanner';
 import ProtectedRoute from './components/ProtectedRoute';
 import Profile from './pages/Profile';
-import Assistant from './pages/Assistant';
 import Footer from './components/Footer';
 
 function App() {
@@ -81,14 +80,6 @@ function App() {
             element={
               <ProtectedRoute requiredRole="user">
                 <StudyPlanner />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/assistant"
-            element={
-              <ProtectedRoute requiredRole="user">
-                <Assistant />
               </ProtectedRoute>
             }
           />
