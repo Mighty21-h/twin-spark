@@ -21,8 +21,38 @@ const Signup = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const validatePassword = (pass) => {
+        const hasUpper = /[A-Z]/.test(pass);
+        const hasNumber = /[0-9]/.test(pass);
+        const hasSpecial = /[@$!%*?&]/.test(pass);
+        const isLongEnough = pass.length > 6;
+
+        let strength = 0;
+        if (hasUpper) strength++;
+        if (hasNumber) strength++;
+        if (hasSpecial) strength++;
+        if (isLongEnough) strength++;
+
+        return { strength, hasUpper, hasNumber, hasSpecial, isLongEnough };
+    };
+
+    const passwordStats = validatePassword(formData.password);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Email Validation (@gmail.com)
+        if (!formData.email.toLowerCase().endsWith('@gmail.com')) {
+            toast.error('Only @gmail.com addresses are allowed.');
+            return;
+        }
+
+        // Password Validation
+        if (passwordStats.strength < 4) {
+            toast.error('Password must include uppercase, number, special character and be > 6 characters.');
+            return;
+        }
+
         setLoading(true);
         try {
             await signup(formData);
@@ -113,6 +143,37 @@ const Signup = () => {
                                 onChange={handleChange}
                             />
                         </div>
+
+                        {/* Password Strength Meter */}
+                        {formData.password && (
+                            <div className="px-2 space-y-2 animate-fade-in">
+                                <div className="flex gap-1 h-1.5">
+                                    {[1, 2, 3, 4].map((step) => (
+                                        <div
+                                            key={step}
+                                            className={`flex-1 rounded-full transition-all duration-500 ${passwordStats.strength >= step
+                                                    ? (passwordStats.strength <= 2 ? 'bg-red-500' : passwordStats.strength === 3 ? 'bg-amber-500' : 'bg-emerald-500')
+                                                    : 'bg-gray-200 dark:bg-gray-700'
+                                                }`}
+                                        />
+                                    ))}
+                                </div>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                    <div className={`text-[10px] font-bold flex items-center gap-1 ${passwordStats.isLongEnough ? 'text-emerald-500' : 'text-gray-400'}`}>
+                                        <div className={`w-1 h-1 rounded-full ${passwordStats.isLongEnough ? 'bg-emerald-500' : 'bg-gray-400'}`} />  6 Characters
+                                    </div>
+                                    <div className={`text-[10px] font-bold flex items-center gap-1 ${passwordStats.hasUpper ? 'text-emerald-500' : 'text-gray-400'}`}>
+                                        <div className={`w-1 h-1 rounded-full ${passwordStats.hasUpper ? 'bg-emerald-500' : 'bg-gray-400'}`} /> Uppercase
+                                    </div>
+                                    <div className={`text-[10px] font-bold flex items-center gap-1 ${passwordStats.hasNumber ? 'text-emerald-500' : 'text-gray-400'}`}>
+                                        <div className={`w-1 h-1 rounded-full ${passwordStats.hasNumber ? 'bg-emerald-500' : 'bg-gray-400'}`} /> Number
+                                    </div>
+                                    <div className={`text-[10px] font-bold flex items-center gap-1 ${passwordStats.hasSpecial ? 'text-emerald-500' : 'text-gray-400'}`}>
+                                        <div className={`w-1 h-1 rounded-full ${passwordStats.hasSpecial ? 'bg-emerald-500' : 'bg-gray-400'}`} /> Special Char
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <button

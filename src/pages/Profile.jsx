@@ -18,9 +18,14 @@ const Profile = () => {
     const [uploading, setUploading] = useState(false);
     const [settings, setSettings] = useState(() => {
         try {
-            return JSON.parse(localStorage.getItem(`bilih_settings_${user?.username}`)) || { notif: true, privacy: true, newsletter: false };
+            return JSON.parse(localStorage.getItem(`bilih_settings_${user?.username}`)) || { 
+                notif: true, 
+                privacy: true, 
+                newsletter: false,
+                twoFactor: false
+            };
         } catch {
-            return { notif: true, privacy: true, newsletter: false };
+            return { notif: true, privacy: true, newsletter: false, twoFactor: false };
         }
     });
 
@@ -217,6 +222,7 @@ const Profile = () => {
                                 {[ 
                                     { id: 'notif', icon: <FiBell/>, label: 'Push Notifications', desc: 'Receive updates on opportunities' },
                                     { id: 'privacy', icon: <FiShield/>, label: 'Profile Visibility', desc: 'Allow recruiters to find you' },
+                                    { id: 'twoFactor', icon: <FiLock/>, label: 'Two-Step Verification', desc: 'Extra layer of security for login' },
                                     { id: 'newsletter', icon: <FiMail/>, label: 'Newsletter', desc: 'Study tips directly to inbox' }
                                 ].map((setting, i) => (
                                     <div key={setting.id} className="flex items-center justify-between p-5 bg-gray-50 dark:bg-gray-800/50 rounded-[1.5rem] border border-gray-100 dark:border-gray-800 hover:border-blue-500/30 transition-colors">

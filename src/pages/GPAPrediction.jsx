@@ -6,12 +6,13 @@ import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts';
 import FeedbackSection from '../components/FeedbackSection';
+import Chatbot from "../components/Chatbot";
 
 const DEPTS = ['Computer Science', 'Electrical Engineering', 'Software Engineering', 'Information Technology', 'Civil Engineering', 'Mechanical Engineering'];
 
 const GPAPrediction = () => {
     const { user } = useAuth();
-    
+
     // Form State
     const [department, setDepartment] = useState('Computer Science');
     const [semester, setSemester] = useState('1');
@@ -19,7 +20,7 @@ const GPAPrediction = () => {
     const [courses, setCourses] = useState([
         { id: Date.now(), name: '', credit: '' }
     ]);
-    
+
     // Output State
     const [calculatedGPA, setCalculatedGPA] = useState(null);
     const [hasCalculated, setHasCalculated] = useState(false);
@@ -33,14 +34,14 @@ const GPAPrediction = () => {
     // Dynamic Handlers
     const addCourse = () => setCourses([...courses, { id: Date.now(), name: '', credit: '' }]);
     const removeCourse = (id) => setCourses(courses.filter(c => c.id !== id));
-    
+
     const updateCourse = (id, field, value) => {
         setCourses(courses.map(c => c.id === id ? { ...c, [field]: value } : c));
     };
 
     const handleCalculate = (e) => {
         e.preventDefault();
-        
+
         // Basic calculation mock for "Predicted GPA" based on current GPA.
         // In a real app we'd need them to put estimated grades too. Since they just put course name and credit,
         // we'll predict a realistic future outcome by slightly boosting or keeping current GPA.
@@ -49,10 +50,10 @@ const GPAPrediction = () => {
 
         // A mock logic simply predicting what their GPA might be based on load
         // E.g. more credits = slightly higher variance. We'll do a simple mock:
-        let newGpa = baseGPA + (Math.random() * 0.4 - 0.1); 
+        let newGpa = baseGPA + (Math.random() * 0.4 - 0.1);
         if (newGpa > 4.0) newGpa = 4.0;
         if (newGpa < 0.0) newGpa = 0.0;
-        
+
         setCalculatedGPA(newGpa.toFixed(2));
         setHasCalculated(true);
         fetchAISuggestions(newGpa.toFixed(2));
@@ -106,7 +107,7 @@ const GPAPrediction = () => {
         data.push({ name: 'Past', GPA: (current - 0.2).toFixed(2), Target: 3.5 });
         data.push({ name: 'Current', GPA: current, Target: 3.5 });
         data.push({ name: `Predicted Sem ${semester}`, GPA: predicted, Target: 3.5 });
-        
+
         // Extrapolate next
         let future = predicted + 0.1;
         if (future > 4) future = 4.0;
@@ -117,7 +118,7 @@ const GPAPrediction = () => {
     return (
         <div className="min-h-[calc(100vh-80px)] pt-28 pb-12 px-4 sm:px-6 lg:px-8 bg-[rgb(var(--background))]">
             <div className="max-w-6xl mx-auto space-y-8">
-                
+
                 {/* Header */}
                 <div className="glass-card rounded-[2.5rem] p-8 relative overflow-hidden flex justify-between items-center bg-gradient-to-r from-blue-900/10 to-indigo-900/10 border-blue-500/20">
                     <div className="relative z-10">
@@ -132,17 +133,17 @@ const GPAPrediction = () => {
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-                    
+
                     {/* Input Form Column */}
                     <div className="xl:col-span-5 space-y-6">
                         <div className="glass-card rounded-[2rem] p-8 shadow-xl">
                             <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-6">Simulation Input</h2>
                             <form onSubmit={handleCalculate} className="space-y-6">
-                                
+
                                 <div>
                                     <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Department</label>
-                                    <select 
-                                        value={department} 
+                                    <select
+                                        value={department}
                                         onChange={(e) => setDepartment(e.target.value)}
                                         className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-3.5 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900 dark:text-white transition-colors"
                                     >
@@ -153,8 +154,8 @@ const GPAPrediction = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Semester</label>
-                                        <select 
-                                            value={semester} 
+                                        <select
+                                            value={semester}
                                             onChange={(e) => setSemester(e.target.value)}
                                             className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-3.5 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-900 dark:text-white"
                                         >
@@ -164,11 +165,11 @@ const GPAPrediction = () => {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Current GPA</label>
-                                        <input 
-                                            required 
-                                            type="number" 
-                                            step="0.01" 
-                                            min="0" 
+                                        <input
+                                            required
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
                                             max="4"
                                             value={currentGPA}
                                             onChange={(e) => setCurrentGPA(e.target.value)}
@@ -189,17 +190,17 @@ const GPAPrediction = () => {
                                     <div className="space-y-3">
                                         {courses.map((course, idx) => (
                                             <div key={course.id} className="flex gap-2">
-                                                <input 
-                                                    required 
+                                                <input
+                                                    required
                                                     value={course.name}
                                                     onChange={(e) => updateCourse(course.id, 'name', e.target.value)}
                                                     placeholder="Course Name (e.g. CS101)"
                                                     className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold text-gray-900 dark:text-white"
                                                 />
-                                                <input 
-                                                    required 
-                                                    type="number" 
-                                                    min="1" 
+                                                <input
+                                                    required
+                                                    type="number"
+                                                    min="1"
                                                     max="6"
                                                     value={course.credit}
                                                     onChange={(e) => updateCourse(course.id, 'credit', e.target.value)}
@@ -227,7 +228,7 @@ const GPAPrediction = () => {
                     <div className="xl:col-span-7 space-y-6">
                         {hasCalculated ? (
                             <div className="animate-fade-in space-y-6">
-                                
+
                                 {/* Top Results Result Card */}
                                 <div className="glass-card rounded-[2rem] p-8 border-none bg-gradient-to-br from-indigo-600 to-blue-700 shadow-xl shadow-blue-900/20 text-white">
                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -252,8 +253,8 @@ const GPAPrediction = () => {
                                                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                                                 <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                                                 <YAxis domain={[0, 4.0]} tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-                                                <Tooltip 
-                                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', fontWeight: 'bold' }} 
+                                                <Tooltip
+                                                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)', fontWeight: 'bold' }}
                                                     itemStyle={{ color: '#2563eb' }}
                                                 />
                                                 <ReferenceLine y={3.5} label={{ value: "Target (3.5)", fill: '#10b981', fontSize: 12, fontWeight: 'bold', position: 'insideTopLeft' }} stroke="#10b981" strokeDasharray="3 3" />
@@ -273,7 +274,7 @@ const GPAPrediction = () => {
                                     )}
                                     <h3 className="text-xl font-black text-gray-900 dark:text-white mb-4">AI Suggested Roadmap</h3>
                                     <p className="text-sm text-gray-500 font-medium mb-6">Based on your calculated progression in <span className="font-bold text-gray-900 dark:text-white">{department}</span>, Gemini suggests these focuses:</p>
-                                    
+
                                     <div className="space-y-6">
                                         <div>
                                             <p className="text-[10px] font-black uppercase text-blue-500 tracking-widest mb-3">Recommended Skills</p>

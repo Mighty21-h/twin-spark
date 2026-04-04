@@ -108,8 +108,23 @@ export const AuthProvider = ({ children }) => {
     };
 
     const signup = async (userData) => {
-        if (!userData.username || !userData.password || !userData.name) {
-            throw new Error('Name, username and password are required.');
+        if (!userData.username || !userData.password || !userData.name || !userData.email) {
+            throw new Error('Name, username, email and password are required.');
+        }
+
+        // Email Validation (@gmail.com)
+        if (!userData.email.toLowerCase().endsWith('@gmail.com')) {
+            throw new Error('Only @gmail.com addresses are allowed.');
+        }
+
+        // Password Validation
+        const hasUpper = /[A-Z]/.test(userData.password);
+        const hasNumber = /[0-9]/.test(userData.password);
+        const hasSpecial = /[@$!%*?&]/.test(userData.password);
+        const isLongEnough = userData.password.length > 6;
+
+        if (!hasUpper || !hasNumber || !hasSpecial || !isLongEnough) {
+            throw new Error('Password must include uppercase, number, special character and be > 6 characters.');
         }
 
         // Check if username already taken
