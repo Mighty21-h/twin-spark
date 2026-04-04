@@ -63,7 +63,7 @@ const LanguageTutor = () => {
         try {
             // For Hackathon/Mock: Send the user object as a "token"
             const token = encodeURIComponent(JSON.stringify(user));
-            const response = await fetch('http://localhost:5000/api/languages/practice', {
+            const response = await fetch('http://localhost:5000/api/languages/translate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -78,10 +78,10 @@ const LanguageTutor = () => {
 
             const result = await response.json();
 
-            if (result.success) {
-                setMessages(prev => [...prev, { role: 'assistant', content: result.reply, timestamp: new Date() }]);
+            if (result.translation) {
+                setMessages(prev => [...prev, { role: 'assistant', content: result.translation, timestamp: new Date() }]);
             } else {
-                toast.error(result.message || "Failed to get response");
+                toast.error("Failed to get response");
             }
         } catch (error) {
             toast.error("Network Error: Could not reach the tutor.");
