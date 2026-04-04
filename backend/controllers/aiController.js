@@ -1,12 +1,17 @@
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const pool = require('../db');
 const axios = require('axios');
 require('dotenv').config();
 
 // Mock AI query function
-const queryMock = async (promptText) => {
-    return "This is a simulated AI response.";
-};
+const queryGemini = async (promptText) => {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
+    const result = await model.generateContent(promptText);
+
+    return result.response.text();
+};
 const getRecommendations = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -61,11 +66,20 @@ const getRecommendations = async (req, res) => {
         `;
 
         // Use Simulation Fallback
-        const recommendations = {
-            "nextSkill": `Introduction to JavaScript (Simulated AI)`,
-            "nextProject": "Personal Portfolio Website",
-            "nextEvent": "Local Tech Meetup nearby"
-        };
+        const aiResponse = await queryGemini(prompt);
+
+        // Convert AI text → JSON safely
+        let recommendations;
+        try {
+            recommendations = JSON.parse(aiResponse);
+        } catch (e) {
+            console.warn("AI returned non-JSON, fallback used.");
+            recommendations = {
+                nextSkill: "Learn JavaScript Basics",
+                nextProject: "Build a Portfolio Website",
+                nextEvent: "Attend a campus tech event"
+            };
+        }
 
         return res.status(200).json({
             success: true,
@@ -93,12 +107,26 @@ const getGPASuggestions = async (req, res) => {
         }
         `;
 
-        // Mock Fallback for GPA suggestions
-        const suggestions = {
-            "skills": ["Cloud Infrastructure", "System Design"],
-            "courses": ["Ethics in AI", "Entrepreneurship for Engineers"],
-            "languages": ["Amharic (Technical Focus)", "English (Professional)"]
-        };
+        // Call Gemini AI
+        let aiResponse = await queryGemini(prompt);
+
+        // Clean response (IMPORTANT)
+        aiResponse = aiResponse.replace(/```json|```/g, '').trim();
+
+        // Parse safely
+        let suggestions;
+        try {
+            suggestions = JSON.parse(aiResponse);
+        } catch (e) {
+            console.warn("AI JSON parse failed, using fallback.");
+            suggestions = {
+                skills: ["Time Management", "Critical Thinking"],
+                courses: ["Advanced Algorithms"],
+                languages: ["English"]
+            };
+        }
+
+        return res.status(200).json({ success: true, data: suggestions });
 
         return res.status(200).json({ success: true, data: suggestions });
     } catch (error) {
@@ -110,7 +138,7 @@ const generateStudySchedule = async (req, res) => {
     try {
         const { selectedCourses = [], freeTime = {}, deadlines = [], week = "" } = req.body;
         console.log(`[AI] Generating schedule for week: ${week}, courses: ${selectedCourses.length}`);
-        
+
         const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         const timeSlots = [
             "12:00 Morning", "1:00 LT", "2:00 LT", "3:00 LT", "4:00 LT", "5:00 LT", "6:00 Midday",
@@ -119,10 +147,10 @@ const generateStudySchedule = async (req, res) => {
         ];
 
         const mock = {};
-        
+
         days.forEach(day => {
             const userSlots = freeTime[day] || [];
-            
+
             // Map the daily schedule
             mock[day] = timeSlots.map((time, idx) => {
                 // If user selected this slot, fill it with a course or 'Study'
@@ -135,7 +163,7 @@ const generateStudySchedule = async (req, res) => {
                         color: course.color || "bg-blue-500"
                     };
                 }
-                
+
                 // If not selected, mark as 'unavailable' or 'free'
                 return {
                     time,
@@ -146,10 +174,10 @@ const generateStudySchedule = async (req, res) => {
             });
         });
 
-        return res.status(200).json({ 
-            success: true, 
+        return res.status(200).json({
+            success: true,
             schedule: mock,
-            message: "Schedule generated based on your availability! 🧠" 
+            message: "Schedule generated based on your availability! 🧠"
         });
     } catch (error) {
         console.error("[AI ERROR] Generation failed:", error);
